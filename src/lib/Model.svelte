@@ -2,7 +2,7 @@
     import { useGltf } from "@threlte/extras";
     import { useTask, T } from "@threlte/core";
     import * as THREE from "three";
-    import { createLavaMaterial } from "./LavaMaterial.ts";
+    import { createLavaMaterial } from "./LavaMaterial";
 
     interface Props {
         file: string; // e.g. '/models/musicbox-default.glb'
@@ -18,7 +18,7 @@
         reducedMotion = false,
     }: Props = $props();
 
-    const gltf = useGltf(() => file);
+    const gltf = $derived(useGltf(file));
 
     let spinnerRef = $state<THREE.Object3D | null>(null);
     let displayVelocity = $state(0);
@@ -35,7 +35,7 @@
 
         let foundSpinner = false;
 
-        scene.traverse((node) => {
+        scene.traverse((node: THREE.Object3D) => {
             if (node instanceof THREE.Mesh) {
                 node.material = mat;
                 node.castShadow = true;

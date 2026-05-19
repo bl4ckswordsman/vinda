@@ -77,7 +77,7 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true, // Prevents 404s in dev mode
+        enabled: false, // Prevents 404s in dev mode
         type: "module",
       },
     }),

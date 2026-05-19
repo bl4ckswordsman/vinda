@@ -1,11 +1,11 @@
 <script lang="ts">
     import { setContext, untrack } from "svelte";
-    import { createAppState } from "$lib/state.svelte.ts";
-    import { GestureController } from "$lib/GestureController.ts";
-    import { AudioEngine } from "$lib/AudioEngine.ts";
+    import { createAppState } from "$lib/state.svelte";
+    import { GestureController } from "$lib/GestureController";
+    import { AudioEngine } from "$lib/AudioEngine";
     import Scene from "$lib/Scene.svelte";
     import Carousel from "$lib/Carousel.svelte";
-    import type { ModelEntry, TuneEntry } from "$lib/types.ts";
+    import type { ModelEntry, TuneEntry } from "$lib/types";
 
     // ─── Shared state ──────────────────────────────────────────────────────────
     const appState = createAppState();

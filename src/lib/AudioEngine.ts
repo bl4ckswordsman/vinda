@@ -1,6 +1,6 @@
 import * as Tone from 'tone';
-import type { TuneEntry, SequencedTune } from './types.ts';
-import { isFileTune } from './types.ts';
+import type { TuneEntry, SequencedTune } from './types';
+import { isFileTune } from './types';
 
 const BELL_SYNTH_OPTIONS: Partial<Tone.SynthOptions> = {
   oscillator: { type: 'triangle' } as Tone.OmniOscillatorOptions,
@@ -9,7 +9,7 @@ const BELL_SYNTH_OPTIONS: Partial<Tone.SynthOptions> = {
     decay: 0.4,
     sustain: 0.0,
     release: 1.6,
-  },
+  } as any,
   volume: -8,
 };
 

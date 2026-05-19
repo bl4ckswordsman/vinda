@@ -2,7 +2,7 @@
     import { T } from "@threlte/core";
     import { useTask } from "@threlte/core";
     import * as THREE from "three";
-    import { createLavaMaterial } from "./LavaMaterial.ts";
+    import { createLavaMaterial } from "./LavaMaterial";
 
     interface Props {
         color?: string;
@@ -19,7 +19,7 @@
     // Svelte 5: Make the material reactive so it updates when the color prop changes
     const mat = $derived(createLavaMaterial({ color }));
 
-    let spinnerGroup = $state<THREE.Group | null>(null);
+    let spinnerGroup = $state<THREE.Group | undefined>(undefined);
     let displayVelocity = $state(0);
 
     // Lowered friction so the visual crank responds tighter to your finger

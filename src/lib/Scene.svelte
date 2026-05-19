@@ -29,18 +29,12 @@
 -->
 <div class="canvas-wrapper" class:sleeping={isSleeping} style="--glow: {color}">
     <Canvas
-        rendererParameters={{ alpha: true, antialias: true }}
-        frameloop={isSleeping ? "never" : "always"}
+        renderMode={isSleeping ? "on-demand" : "always"}
     >
         <RendererSetup />
 
         <!-- HDRI environment map — reflections only, no visible background -->
-        <Environment
-            path="/hdri/"
-            files="studio.hdr"
-            background={false}
-            isBackground={false}
-        />
+        <Environment url="/hdri/studio.hdr" />
 
         <!-- Fixed product-shot camera -->
         <T.PerspectiveCamera makeDefault position={[0, -0.2, 4]} fov={35} />

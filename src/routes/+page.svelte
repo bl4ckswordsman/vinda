@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { setContext } from "svelte";
+    import { setContext, untrack } from "svelte";
     import { createAppState } from "$lib/state.svelte.ts";
     import { GestureController } from "$lib/GestureController.ts";
     import { AudioEngine } from "$lib/AudioEngine.ts";
@@ -65,17 +65,6 @@
     let gestureActive = $state(false);
     let energy = $state(0); // Stores the spring tension (0 to 3000)
 
-    // AUDIO TEMPO CONTROL (Decoupled from the 3D visual rotation!)
-    $effect(() => {
-        if (!gestureActive && energy > 0) {
-            // Audio plays at normal 1.0 speed, smoothly ramping down right at the end
-            const targetTempo = 0.8;
-
-            const audioTempo =
-                energy > 100 ? targetTempo : Math.max(0.1, energy / 100);
-            audio.setVelocity(audioTempo);
-        }
-    });
 
     // 1. The Winding Action (Pointer Down)
     $effect(() => {
@@ -104,26 +93,44 @@
         if (gestureActive) return;
 
         let rafId: number;
+        let lastAudioTempo = 0;
 
         function tick() {
-            if (energy > 0) {
-                energy -= UNWINDING_DRAIN_RATE;
-                if (energy < 0) energy = 0;
+            const currentEnergy = untrack(() => energy);
+            if (currentEnergy > 0) {
+                const nextEnergy = Math.max(
+                    0,
+                    currentEnergy - UNWINDING_DRAIN_RATE,
+                );
+                energy = nextEnergy;
 
                 // Set the VISUAL rotation speed for the 3D model
                 const playSpeed =
-                    energy > 100
+                    nextEnergy > 100
                         ? VISUAL_UNWINDING_SPEED
-                        : (energy / 100) * VISUAL_UNWINDING_SPEED;
+                        : (nextEnergy / 100) * VISUAL_UNWINDING_SPEED;
                 appState.velocity = playSpeed;
+
+                // AUDIO TEMPO CONTROL: Decoupled from the 3D visual rotation!
+                const targetTempo = 0.8;
+                const audioTempo =
+                    nextEnergy > 100 ? targetTempo : Math.max(0.1, nextEnergy / 100);
+
+                if (Math.abs(audioTempo - lastAudioTempo) > 0.01) {
+                    audio.setVelocity(audioTempo);
+                    lastAudioTempo = audioTempo;
+                }
 
                 rafId = requestAnimationFrame(tick);
             } else {
                 appState.velocity = 0;
+                audio.setVelocity(0);
+                lastAudioTempo = 0;
             }
         }
 
-        if (energy > 0) {
+        const initialEnergy = untrack(() => energy);
+        if (initialEnergy > 0) {
             rafId = requestAnimationFrame(tick);
         }
 

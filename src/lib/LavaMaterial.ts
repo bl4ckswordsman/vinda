@@ -12,19 +12,18 @@ export interface LavaMaterialOptions {
  */
 export function createLavaMaterial(opts: LavaMaterialOptions = {}): MeshPhysicalMaterial {
   const base = new Color(opts.color ?? '#b5a4f5');
-  const emissiveColor = new Color(opts.emissive ?? opts.color ?? '#b5a4f5').multiplyScalar(0.15);
+  const emissiveColor = new Color(opts.emissive ?? opts.color ?? '#b5a4f5').multiplyScalar(0.12);
 
   return new MeshPhysicalMaterial({
     color: base,
     emissive: emissiveColor,
-    roughness: 0.08,
+    roughness: 0.75,
     metalness: 0.0,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
-    transmission: 0.25,
-    thickness: 0.4,
-    envMapIntensity: 1.4,
-    transparent: true,
-    opacity: 0.97,
+    clearcoat: 0.15,
+    clearcoatRoughness: 0.6,
+    transmission: 0.0,
+    thickness: 0.0,
+    envMapIntensity: 0.35,
+    transparent: false,
   });
 }

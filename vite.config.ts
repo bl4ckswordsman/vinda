@@ -84,7 +84,7 @@ export default defineConfig({
   ],
 
   optimizeDeps: {
-    exclude: ["@threlte/core", "@threlte/extras"],
+    exclude: ["@threlte/core", "@threlte/extras", "threlte-postprocessing"],
   },
 
   ssr: {
@@ -93,6 +93,8 @@ export default defineConfig({
       "@threlte/core",
       "@threlte/extras",
       "@use-gesture/vanilla",
+      "threlte-postprocessing",
+      "postprocessing",
     ],
   },
 });

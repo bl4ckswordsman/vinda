@@ -16,6 +16,7 @@
     "@use-gesture/vanilla": "^10.3.1",
     "postprocessing": "^6.39.1",
     "three": "^0.170.0",
+    "threlte-postprocessing": "^0.0.10",
     "tone": "^15.0.4",
     "tweakpane": "3"
   },

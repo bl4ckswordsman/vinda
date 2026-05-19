@@ -1,0 +1,35 @@
+{
+  "name": "vinda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun vite dev",
+    "build": "bunx --bun vite build",
+    "preview": "bunx --bun vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "icons": "bun scripts/generate-icons.ts"
+  },
+  "dependencies": {
+    "@threlte/core": "^8.5.14",
+    "@threlte/extras": "^9.19.0",
+    "@use-gesture/vanilla": "^10.3.1",
+    "postprocessing": "^6.39.1",
+    "three": "^0.170.0",
+    "tone": "^15.0.4",
+    "tweakpane": "3"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.0.0",
+    "@types/three": "^0.170.0",
+    "@vite-pwa/sveltekit": "^0.6.0",
+    "sharp": "^0.33.5",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.1",
+    "workbox-window": "^7.3.0"
+  }
+}

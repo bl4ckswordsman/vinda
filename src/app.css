@@ -17,6 +17,14 @@
   --accent: #b5a4f5;
   --radius-pill: 9999px;
   --tray-height: 120px;
+  --tray-bg: rgba(13, 13, 15, 0.75);
+
+  /* Danger states (used in back chips) */
+  --danger-color: rgba(255, 160, 160, 0.85);
+  --danger-border: rgba(255, 110, 110, 0.25);
+  --danger-bg: rgba(255, 100, 100, 0.03);
+  --danger-bg-hover: rgba(255, 100, 100, 0.08);
+  --danger-border-hover: rgba(255, 110, 110, 0.4);
 }
 
 html, body {

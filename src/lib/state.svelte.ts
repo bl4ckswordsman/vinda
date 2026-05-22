@@ -32,7 +32,35 @@ export function createAppState() {
   let selectedTuneId = $state('default');
 
   // Theme
-  let darkMode = $state(true);
+  let theme = $state<'system' | 'dark' | 'light'>(
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('vinda-theme') as 'system' | 'dark' | 'light' ?? 'system')
+      : 'system'
+  );
+  let systemPrefersDark = $state(
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : false
+  );
+
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = (e: MediaQueryListEvent) => {
+        systemPrefersDark = e.matches;
+      };
+      mediaQuery.addEventListener('change', listener);
+      return () => {
+        mediaQuery.removeEventListener('change', listener);
+      };
+    }
+  });
+
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vinda-theme', theme);
+    }
+  });
 
   // Derived helpers
   const selectedModel = $derived(
@@ -42,6 +70,9 @@ export function createAppState() {
     tunes.find(t => t.id === selectedTuneId) ?? DEFAULT_TUNE
   );
   const isSpinning = $derived(Math.abs(velocity) > 0.01);
+  const darkMode = $derived(
+    theme === 'system' ? systemPrefersDark : theme === 'dark'
+  );
 
   return {
     get velocity() { return velocity; },
@@ -65,8 +96,19 @@ export function createAppState() {
     get selectedTuneId() { return selectedTuneId; },
     set selectedTuneId(id: string) { selectedTuneId = id; },
 
+    get theme() { return theme; },
+    set theme(t: 'system' | 'dark' | 'light') { theme = t; },
     get darkMode() { return darkMode; },
-    set darkMode(d: boolean) { darkMode = d; },
+
+    cycleTheme() {
+      if (theme === 'system') {
+        theme = 'dark';
+      } else if (theme === 'dark') {
+        theme = 'light';
+      } else {
+        theme = 'system';
+      }
+    },
 
     get selectedModel() { return selectedModel; },
     get selectedTune() { return selectedTune; },

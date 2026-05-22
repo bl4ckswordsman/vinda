@@ -236,15 +236,16 @@
         left: 0;
         right: 0;
         padding: 14px 16px 32px;
-        background: rgba(13, 13, 15, 0.75);
+        background: var(--tray-bg);
         backdrop-filter: blur(20px) saturate(160%);
         -webkit-backdrop-filter: blur(20px) saturate(160%);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid var(--border);
         display: flex;
         flex-direction: column;
         gap: 8px;
         touch-action: none;
         z-index: 10;
+        transition: background 0.3s, border-color 0.3s;
     }
 
     .strip-label {
@@ -252,9 +253,10 @@
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.35);
+        color: var(--text-muted);
         padding-left: 4px;
         margin-bottom: -4px;
+        transition: color 0.3s;
     }
 
     .model-strip,
@@ -281,28 +283,36 @@
         min-width: 44px;
         padding: 8px 16px;
         border-radius: 22px;
-        border: 1.5px solid rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.07);
-        color: rgba(255, 255, 255, 0.75);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        opacity: 0.85;
         font-size: 13px;
         font-weight: 500;
         white-space: nowrap;
         transition:
             background 0.18s ease,
             border-color 0.18s ease,
-            color 0.18s ease;
+            color 0.18s ease,
+            opacity 0.18s ease;
         flex-shrink: 0;
     }
 
     .chip:hover {
-        background: rgba(255, 255, 255, 0.13);
-        border-color: rgba(255, 255, 255, 0.25);
+        background: var(--surface-hover);
+        border-color: var(--border-active);
+        opacity: 1;
     }
 
     .chip.active {
-        background: rgba(181, 164, 245, 0.18);
-        border-color: rgba(181, 164, 245, 0.6);
-        color: #e8e0ff;
+        background: rgba(181, 164, 245, 0.15);
+        border-color: var(--accent);
+        color: var(--text);
+        opacity: 1;
+    }
+
+    :global(.app.light) .chip.active {
+        background: rgba(121, 101, 196, 0.12);
     }
 
     .color-dot {
@@ -319,13 +329,13 @@
     }
 
     .back-chip {
-        border-color: rgba(255, 110, 110, 0.25);
-        color: rgba(255, 160, 160, 0.85);
-        background: rgba(255, 100, 100, 0.03);
+        border-color: var(--danger-border);
+        color: var(--danger-color);
+        background: var(--danger-bg);
     }
 
     .back-chip:hover {
-        background: rgba(255, 100, 100, 0.08);
-        border-color: rgba(255, 110, 110, 0.4);
+        background: var(--danger-bg-hover);
+        border-color: var(--danger-border-hover);
     }
 </style>

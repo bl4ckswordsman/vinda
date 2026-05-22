@@ -5,6 +5,7 @@
     import { AudioEngine } from "$lib/AudioEngine";
     import Scene from "$lib/Scene.svelte";
     import Carousel from "$lib/Carousel.svelte";
+    import Icon from "$lib/Icon.svelte";
     import type { ModelEntry, TuneEntry } from "$lib/types";
 
     // ─── Shared state ──────────────────────────────────────────────────────────
@@ -218,14 +219,20 @@
         <button
             class="icon-btn"
             onclick={() => {
-                appState.darkMode = !appState.darkMode;
+                appState.cycleTheme();
             }}
-            aria-label={appState.darkMode
-                ? "Switch to light mode"
-                : "Switch to dark mode"}
-            title={appState.darkMode ? "Light mode" : "Dark mode"}
+            aria-label={appState.theme === "system"
+                ? "Theme: System. Click to switch to Dark"
+                : appState.theme === "dark"
+                  ? "Theme: Dark. Click to switch to Light"
+                  : "Theme: Light. Click to switch to System"}
+            title={appState.theme === "system"
+                ? "Theme: System (Click to switch to Dark)"
+                : appState.theme === "dark"
+                  ? "Theme: Dark (Click to switch to Light)"
+                  : "Theme: Light (Click to switch to System)"}
         >
-            {appState.darkMode ? "☀️" : "🌙"}
+            <Icon name="theme-{appState.theme}" size={18} />
         </button>
     </header>
 
@@ -275,6 +282,20 @@
     .app.light {
         --bg: #f0eeff;
         --text: #1a1030;
+        --surface: rgba(26, 16, 48, 0.06);
+        --surface-hover: rgba(26, 16, 48, 0.12);
+        --border: rgba(26, 16, 48, 0.12);
+        --border-active: rgba(26, 16, 48, 0.45);
+        --text-muted: rgba(26, 16, 48, 0.5);
+        --accent: #7965c4;
+        --tray-bg: rgba(240, 238, 255, 0.75);
+
+        /* Danger states for light mode */
+        --danger-color: #c44545;
+        --danger-border: rgba(196, 69, 69, 0.25);
+        --danger-bg: rgba(196, 69, 69, 0.03);
+        --danger-bg-hover: rgba(196, 69, 69, 0.08);
+        --danger-border-hover: rgba(196, 69, 69, 0.4);
     }
 
     .canvas-target {
@@ -319,16 +340,18 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
         font-size: 18px;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        transition: background 0.2s;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .icon-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
+        background: var(--surface-hover);
+        border-color: var(--border-active);
     }
 
     /* ── Sleep hint ── */
@@ -338,7 +361,7 @@
         left: 50%;
         transform: translate(-50%, 50%);
         font-size: 14px;
-        color: rgba(255, 255, 255, 0.4);
+        color: var(--text-muted);
         letter-spacing: 0.06em;
         pointer-events: none;
         z-index: 5;

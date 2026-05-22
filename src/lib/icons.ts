@@ -6,6 +6,5 @@ export const CATEGORY_ICONS: Record<string, string> = {
 
 export const GROUP_ICONS: Record<string, string> = {
   "Super Mario": "Super Mario",
-  "Mario & Luigi": "Mario & Luigi",
   Default: "Default"
 };

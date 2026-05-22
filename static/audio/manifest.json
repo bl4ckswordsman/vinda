@@ -18,7 +18,9 @@
       "A4",
       "B4"
     ],
-    "durations": ["8n"],
+    "durations": [
+      "8n"
+    ],
     "bpm": 80
   },
   {
@@ -41,7 +43,9 @@
       "D5",
       "C5"
     ],
-    "durations": ["8n"],
+    "durations": [
+      "8n"
+    ],
     "bpm": 70
   },
   {
@@ -65,14 +69,16 @@
       "D4",
       "D4"
     ],
-    "durations": ["8n"],
+    "durations": [
+      "8n"
+    ],
     "bpm": 90
   },
   {
     "id": "antasma",
     "label": "The Final Antasma Battle - Yoko Shimomura",
     "category": "Games",
-    "group": "Mario & Luigi",
+    "group": "Super Mario",
     "notes": [
       "A4",
       "G#4",

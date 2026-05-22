@@ -22,9 +22,10 @@
     });
 
     function togglePlay() {
-        if (appState.isPlaying) {
+        const isCurrentlyPlaying = appState.isPlaying || energy > 0;
+        if (isCurrentlyPlaying) {
             appState.isPlaying = false;
-            energy = 0; // stop visual movement
+            energy = 0; // stop visual movement and clear winding energy
         } else {
             appState.isPlaying = true;
             handleInteraction();
@@ -78,7 +79,7 @@
                 appState.isPlaying = false; // Turn off autoplay when manual winding starts
                 // WINDING: Every pixel you pull adds tension to the spring
                 energy += Math.abs(deltaX) * WINDING_ENERGY_RATE;
-                energy = Math.min(energy, 3000);
+                energy = Math.min(energy, 30000);
 
                 // Set the VISUAL rotation speed for the 3D model
                 appState.velocity = deltaX * VISUAL_WINDING_SPEED;
@@ -231,7 +232,7 @@
         <div class="app-name">vinda</div>
         <div class="top-controls">
             <!-- Info Chip -->
-            <TuneInfoChip {energy} {gestureActive} onTogglePlay={togglePlay} />
+            <TuneInfoChip {energy} maxEnergy={30000} {gestureActive} onTogglePlay={togglePlay} />
 
             <!-- Theme Cycle Button -->
             <button

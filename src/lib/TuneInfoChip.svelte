@@ -5,11 +5,12 @@
 
     interface Props {
         energy: number;
+        maxEnergy: number;
         gestureActive: boolean;
         onTogglePlay: () => void;
     }
 
-    let { energy, gestureActive, onTogglePlay }: Props = $props();
+    let { energy, maxEnergy, gestureActive, onTogglePlay }: Props = $props();
 
     const appState = getContext<AppState>("app");
 
@@ -89,11 +90,81 @@
             expandChipTemporarily();
         });
     });
+
+    // --- Circular Wavy Progress Math & Logic ---
+    let phase = $state(0);
+    let waveAmp = $state(0);
+
+    const progress = $derived.by(() => {
+        if (appState.isPlaying) return 1.0;
+        return Math.min(Math.max(energy / maxEnergy, 0), 1.0);
+    });
+
+    const isPlayingOrWound = $derived(appState.isPlaying || energy > 0);
+
+    function generateWavyCirclePath(
+        cx: number,
+        cy: number,
+        r_base: number,
+        amplitude: number,
+        lobes: number,
+        phase: number,
+        segments = 120
+    ) {
+        let points: string[] = [];
+        for (let i = 0; i < segments; i++) {
+            const theta = (i / segments) * 2 * Math.PI;
+            // Primary wave (lobes peaks) and secondary wave (double frequency, reverse direction)
+            const wave1 = 0.7 * Math.sin(lobes * theta + phase);
+            const wave2 = 0.3 * Math.sin((lobes * 2) * theta - phase * 1.5);
+            const r = r_base + amplitude * (wave1 + wave2);
+            
+            const x = cx + r * Math.cos(theta);
+            const y = cy + r * Math.sin(theta);
+            if (i === 0) {
+                points.push(`M ${x.toFixed(2)} ${y.toFixed(2)}`);
+            } else {
+                points.push(`L ${x.toFixed(2)} ${y.toFixed(2)}`);
+            }
+        }
+        points.push("Z");
+        return points.join(" ");
+    }
+
+    const wavyPath = $derived(generateWavyCirclePath(18, 18, 16.0, waveAmp, 8, phase));
+
+    const isAnimationActive = $derived(appState.isPlaying || energy > 0 || gestureActive);
+
+    $effect(() => {
+        let rafId: number;
+        // Depend on the derived boolean so this effect only re-runs when the active state changes
+        const active = isAnimationActive;
+        const targetAmp = active ? 1.2 : 0;
+
+        function tick() {
+            const diff = targetAmp - waveAmp;
+            if (Math.abs(diff) > 0.005) {
+                waveAmp += diff * 0.15;
+            } else {
+                waveAmp = targetAmp;
+            }
+
+            if (active || waveAmp > 0.01) {
+                phase = (phase + 0.08) % (2 * Math.PI);
+                rafId = requestAnimationFrame(tick);
+            }
+        }
+
+        rafId = requestAnimationFrame(tick);
+        return () => {
+            if (rafId) cancelAnimationFrame(rafId);
+        };
+    });
 </script>
 
 <div 
     class="info-chip" 
-    class:playing={appState.isPlaying || (energy > 0 && !gestureActive)}
+    class:playing={isPlayingOrWound || gestureActive}
     class:collapsed={!chipExpanded && !isHovered && !chipManuallyExpanded}
     onmouseenter={handleMouseEnter}
     onmouseleave={handleMouseLeave}
@@ -118,29 +189,45 @@
         {/if}
     </div>
 
-    <!-- Squiggly Wave visualizer -->
-    <div class="wave-container" aria-hidden="true">
-        <svg class="squiggly-wave" class:active={appState.isPlaying || (energy > 0 && !gestureActive)} viewBox="0 0 24 12">
-            <path class="wave-path path-1" d="M0,6 Q3,2 6,6 T12,6 T18,6 T24,6" fill="none" stroke="var(--accent)" stroke-width="1.5" />
-            <path class="wave-path path-2" d="M0,6 Q3,10 6,6 T12,6 T18,6 T24,6" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.5" />
+    <!-- Play/Stop Toggle with Wavy Progress Indicator -->
+    <div class="play-btn-wrapper">
+        <svg class="wavy-progress-svg" viewBox="0 0 36 36" aria-hidden="true">
+            <!-- Wavy background track (subtle) -->
+            <path
+                d={wavyPath}
+                fill="none"
+                stroke="var(--border)"
+                stroke-width="1.5"
+                opacity="0.3"
+            />
+            <!-- Wavy active progress indicator -->
+            <path
+                d={wavyPath}
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                pathLength="100"
+                stroke-dasharray="100"
+                stroke-dashoffset={100 - (progress * 100)}
+            />
         </svg>
-    </div>
 
-    <!-- Play/Stop Toggle -->
-    <button
-        class="play-btn"
-        onclick={onTogglePlay}
-        aria-label={appState.isPlaying ? "Stop music" : "Play music"}
-        title={appState.isPlaying ? "Stop music" : "Play music"}
-    >
-        {#if appState.isPlaying}
-            <span class="pulse-ring ring-1"></span>
-            <span class="pulse-ring ring-2"></span>
-            <Icon name="stop" size={12} />
-        {:else}
-            <Icon name="play" size={12} />
-        {/if}
-    </button>
+        <button
+            class="play-btn"
+            onclick={onTogglePlay}
+            aria-label={isPlayingOrWound ? "Stop music" : "Play music"}
+            title={isPlayingOrWound ? "Stop music" : "Play music"}
+        >
+            {#if isPlayingOrWound}
+                <span class="pulse-ring ring-1"></span>
+                <span class="pulse-ring ring-2"></span>
+                <Icon name="stop" size={12} />
+            {:else}
+                <Icon name="play" size={12} />
+            {/if}
+        </button>
+    </div>
 </div>
 
 <style>
@@ -170,9 +257,9 @@
         border-color: var(--border-active);
     }
 
-    /* Collapsed state: collapses into group icon and play/stop button */
+    /* Collapsed state: collapses into group icon and play/stop button wrapper */
     .info-chip.collapsed {
-        max-width: 76px;
+        max-width: 84px;
         padding: 6px 8px 6px 12px;
     }
 
@@ -232,71 +319,30 @@
         letter-spacing: 0.05em;
     }
 
-    /* Wave visualizer */
-    .wave-container {
+    /* Play/Stop Button Wrapper & Progress SVG */
+    .play-btn-wrapper {
+        position: relative;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
-        width: 24px;
-        height: 12px;
-        min-width: 0;
-        overflow: hidden;
-        margin-left: -2px;
-        margin-right: 12px;
-        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                    width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                    margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                    margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        justify-content: center;
         flex-shrink: 0;
     }
 
-    .info-chip.collapsed .wave-container {
-        opacity: 0;
-        transform: scale(0.8);
-        width: 0;
-        margin-right: 0;
-        margin-left: 0;
+    .wavy-progress-svg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
         pointer-events: none;
+        transform: rotate(-90deg); /* Start progress at 12 o'clock */
     }
 
-    .squiggly-wave {
-        overflow: hidden;
-        width: 24px;
-        height: 12px;
-    }
-
-    .wave-path {
-        stroke-linecap: round;
-    }
-
-    .squiggly-wave.active .path-1 {
-        animation: wave-slide 1.5s linear infinite;
-    }
-
-    .squiggly-wave.active .path-2 {
-        animation: wave-slide-reverse 2s linear infinite;
-    }
-
-    @keyframes wave-slide {
-        0% {
-            stroke-dasharray: 6, 3;
-            stroke-dashoffset: 0;
-        }
-        100% {
-            stroke-dasharray: 6, 3;
-            stroke-dashoffset: -18;
-        }
-    }
-
-    @keyframes wave-slide-reverse {
-        0% {
-            stroke-dasharray: 5, 4;
-            stroke-dashoffset: 0;
-        }
-        100% {
-            stroke-dasharray: 5, 4;
-            stroke-dashoffset: 18;
-        }
+    /* Animate progress stroke color transitions smoothly */
+    .wavy-progress-svg path {
+        transition: stroke-dashoffset 0.15s ease-out, stroke 0.2s, opacity 0.2s;
     }
 
     /* Play/Stop Button inside Chip */

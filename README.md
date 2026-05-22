@@ -27,3 +27,10 @@ bun run dev
 # Build for production
 bun run build
 ```
+
+<details>
+<summary><b>Assets & Attributions</b></summary>
+
+- **Icons**: Icon designs are sourced from [Hugeicons](https://hugeicons.com/).
+</details>
+

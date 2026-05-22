@@ -1,6 +1,9 @@
 <script lang="ts">
     import { DragGesture } from "@use-gesture/vanilla";
+    import { fade } from "svelte/transition";
     import type { ModelEntry, TuneEntry } from "./types.ts";
+    import { CATEGORY_ICONS, GROUP_ICONS } from "./icons";
+    import Icon from "./Icon.svelte";
 
     interface Props {
         models: ModelEntry[];
@@ -22,6 +25,65 @@
 
     let trayEl = $state<HTMLElement | null>(null);
     let modelOffset = $state(0);
+
+    let currentCategory = $state<string | null>(null);
+    let currentGroup = $state<string | null>(null);
+
+    // Derived: unique categories and their icons
+    const categories = $derived.by(() => {
+        const seen = new Set<string>();
+        const list: { name: string; icon: string }[] = [];
+        for (const t of tunes) {
+            const cat = t.category || "Uncategorized";
+            if (!seen.has(cat)) {
+                seen.add(cat);
+                list.push({ name: cat, icon: CATEGORY_ICONS[cat] || CATEGORY_ICONS.Default });
+            }
+        }
+        return list;
+    });
+
+    // Derived: unique groups under active category and their icons
+    const groups = $derived.by(() => {
+        if (!currentCategory) return [];
+        const seen = new Set<string>();
+        const list: { name: string; icon: string }[] = [];
+        for (const t of tunes) {
+            if (t.category === currentCategory && t.group) {
+                if (!seen.has(t.group)) {
+                    seen.add(t.group);
+                    list.push({ name: t.group, icon: GROUP_ICONS[t.group] || GROUP_ICONS.Default });
+                }
+            }
+        }
+        return list;
+    });
+
+    // Derived: visible tunes in current selection view
+    const visibleTunes = $derived.by(() => {
+        if (!currentCategory) return [];
+        return tunes.filter(t => {
+            const sameCat = (t.category || "Uncategorized") === currentCategory;
+            const sameGrp = currentGroup ? t.group === currentGroup : !t.group;
+            return sameCat && sameGrp;
+        });
+    });
+
+    // Derived: breadcrumb label for the tune selector section
+    const tunePath = $derived.by(() => {
+        if (!currentCategory) return "Tune";
+        if (!currentGroup) return `Tune / ${currentCategory}`;
+        return `Tune / ${currentCategory} / ${currentGroup}`;
+    });
+
+    // Auto-sync navigation state with the active selected tune
+    $effect(() => {
+        const activeTune = tunes.find(t => t.id === selectedTuneId);
+        if (activeTune) {
+            currentCategory = activeTune.category || null;
+            currentGroup = activeTune.group || null;
+        }
+    });
 
     $effect(() => {
         if (!trayEl) return;
@@ -100,19 +162,70 @@
     </div>
 
     <!-- Tune strip -->
-    <div class="strip-label">Tune</div>
+    <div class="strip-label">{tunePath}</div>
     <div class="tune-strip">
-        {#each tunes as tune (tune.id)}
+        {#if !currentCategory}
+            {#each categories as cat (cat.name)}
+                <button
+                    transition:fade={{ duration: 120 }}
+                    class="chip category-chip"
+                    onclick={() => currentCategory = cat.name}
+                    aria-label={cat.name}
+                >
+                    <span class="chip-icon">
+                        <Icon name={cat.icon} />
+                    </span>
+                    <span>{cat.name}</span>
+                </button>
+            {/each}
+        {:else}
             <button
-                class="chip"
-                class:active={tune.id === selectedTuneId}
-                onclick={() => onTuneSelect(tune.id)}
-                aria-label={tune.label}
-                aria-pressed={tune.id === selectedTuneId}
+                transition:fade={{ duration: 120 }}
+                class="chip back-chip"
+                onclick={() => {
+                    if (currentGroup) {
+                        currentGroup = null;
+                    } else {
+                        currentCategory = null;
+                    }
+                }}
+                aria-label="Back"
             >
-                ♪ {tune.label}
+                ↩ {currentGroup ? currentCategory : "All"}
             </button>
-        {/each}
+
+            {#if !currentGroup && groups.length > 0}
+                {#each groups as grp (grp.name)}
+                    <button
+                        transition:fade={{ duration: 120 }}
+                        class="chip group-chip"
+                        onclick={() => currentGroup = grp.name}
+                        aria-label={grp.name}
+                    >
+                        <span class="chip-icon">
+                            <Icon name={grp.icon} />
+                        </span>
+                        <span>{grp.name}</span>
+                    </button>
+                {/each}
+            {/if}
+
+            {#each visibleTunes as tune (tune.id)}
+                <button
+                    transition:fade={{ duration: 120 }}
+                    class="chip tune-chip"
+                    class:active={tune.id === selectedTuneId}
+                    onclick={() => onTuneSelect(tune.id)}
+                    aria-label={tune.label}
+                    aria-pressed={tune.id === selectedTuneId}
+                >
+                    <span class="chip-icon">
+                        <Icon name="Classical" size={13} />
+                    </span>
+                    <span>{tune.label}</span>
+                </button>
+            {/each}
+        {/if}
     </div>
 </div>
 
@@ -198,5 +311,21 @@
         border-radius: 50%;
         flex-shrink: 0;
         box-shadow: 0 0 6px currentColor;
+    }
+
+    .chip-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .back-chip {
+        border-color: rgba(255, 110, 110, 0.25);
+        color: rgba(255, 160, 160, 0.85);
+        background: rgba(255, 100, 100, 0.03);
+    }
+
+    .back-chip:hover {
+        background: rgba(255, 100, 100, 0.08);
+        border-color: rgba(255, 110, 110, 0.4);
     }
 </style>

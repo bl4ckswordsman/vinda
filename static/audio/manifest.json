@@ -2,6 +2,7 @@
   {
     "id": "default",
     "label": "Für Elise",
+    "category": "Classical",
     "notes": [
       "E5",
       "D#5",
@@ -23,6 +24,7 @@
   {
     "id": "twinkle",
     "label": "Twinkle",
+    "category": "Classical",
     "notes": [
       "C5",
       "C5",
@@ -45,6 +47,7 @@
   {
     "id": "ode",
     "label": "Ode to Joy",
+    "category": "Classical",
     "notes": [
       "E4",
       "E4",
@@ -68,6 +71,8 @@
   {
     "id": "antasma",
     "label": "The Final Antasma Battle - Yoko Shimomura",
+    "category": "Games",
+    "group": "Mario & Luigi",
     "notes": [
       "A4",
       "G#4",
@@ -115,6 +120,8 @@
   {
     "id": "mario",
     "label": "Super Mario Bros. Theme",
+    "category": "Games",
+    "group": "Super Mario",
     "notes": [
       "E5",
       "E5",

@@ -5,17 +5,20 @@ export interface ModelEntry {
   color: string;   // hex string
 }
 
-export interface SequencedTune {
+export interface BaseTune {
   id: string;
   label: string;
+  category?: string;
+  group?: string;
+}
+
+export interface SequencedTune extends BaseTune {
   notes: string[];
   durations: string[];  // e.g. ["8n"]
   bpm: number;
 }
 
-export interface FileTune {
-  id: string;
-  label: string;
+export interface FileTune extends BaseTune {
   file: string;   // filename relative to /static/audio/
 }
 

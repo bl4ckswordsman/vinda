@@ -30,20 +30,20 @@
 <style>
   .update-banner {
     position: fixed;
-    bottom: 148px; /* above carousel tray */
+    bottom: 168px; /* above carousel tray */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 10px 20px;
-    border-radius: 24px;
+    padding: 12px 24px;
+    border-radius: 28px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 14px;
+    gap: 14px;
+    font-size: 16px;
     z-index: 100;
     white-space: nowrap;
   }
@@ -51,12 +51,12 @@
   .update-banner button {
     background: rgba(255, 255, 255, 0.22);
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     color: #fff;
-    padding: 6px 14px;
+    padding: 8px 16px;
     cursor: pointer;
-    min-height: 44px;
-    font-size: 13px;
+    min-height: 50px;
+    font-size: 15px;
     font-weight: 600;
     transition: background 0.15s;
   }

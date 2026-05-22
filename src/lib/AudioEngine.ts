@@ -23,7 +23,10 @@ export class AudioEngine {
   private baseBpm = 80;
   private userInteracted = false;
 
-  async init(): Promise<void> {
+  constructor() {}
+
+  private _initNodes(): void {
+    if (this.reverb) return; // already initialized
     this.reverb = new Tone.Reverb({ decay: 2.5, wet: 0.35 }).toDestination();
     this.synth  = new Tone.Synth(BELL_SYNTH_OPTIONS).connect(this.reverb);
   }
@@ -33,12 +36,14 @@ export class AudioEngine {
    * Browser autoplay policy blocks audio until a real user gesture.
    */
   async ensureStarted(): Promise<void> {
+    this._initNodes();
     if (this.userInteracted) return;
     await Tone.start();
     this.userInteracted = true;
   }
 
   async loadTune(tune: TuneEntry): Promise<void> {
+    this._initNodes();
     this.stop();
     this.currentTune = tune;
 

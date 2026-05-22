@@ -131,7 +131,7 @@
         return points.join(" ");
     }
 
-    const wavyPath = $derived(generateWavyCirclePath(18, 18, 16.0, waveAmp, 8, phase));
+    const wavyPath = $derived(generateWavyCirclePath(21, 21, 18.0, waveAmp, 8, phase));
 
     const isAnimationActive = $derived(appState.isPlaying || energy > 0 || gestureActive);
 
@@ -179,7 +179,7 @@
     aria-label="Tune info chip"
 >
     <div class="chip-icon">
-        <Icon name={selectedTuneIcon} size={18} />
+        <Icon name={selectedTuneIcon} size={22} />
     </div>
     
     <div class="chip-content">
@@ -191,7 +191,7 @@
 
     <!-- Play/Stop Toggle with Wavy Progress Indicator -->
     <div class="play-btn-wrapper">
-        <svg class="wavy-progress-svg" viewBox="0 0 36 36" aria-hidden="true">
+        <svg class="wavy-progress-svg" viewBox="0 0 42 42" aria-hidden="true">
             <!-- Wavy background track (subtle) -->
             <path
                 d={wavyPath}
@@ -205,11 +205,12 @@
                 d={wavyPath}
                 fill="none"
                 stroke="var(--accent)"
-                stroke-width="2.2"
+                stroke-width="2.5"
                 stroke-linecap="round"
                 pathLength="100"
                 stroke-dasharray="100"
                 stroke-dashoffset={100 - (progress * 100)}
+                opacity={progress > 0.001 ? 1 : 0}
             />
         </svg>
 
@@ -222,9 +223,9 @@
             {#if isPlayingOrWound}
                 <span class="pulse-ring ring-1"></span>
                 <span class="pulse-ring ring-2"></span>
-                <Icon name="stop" size={12} />
+                <Icon name="stop" size={14} />
             {:else}
-                <Icon name="play" size={12} />
+                <Icon name="play" size={14} />
             {/if}
         </button>
     </div>
@@ -234,8 +235,8 @@
     .info-chip {
         display: flex;
         align-items: center;
-        padding: 6px 8px 6px 12px;
-        border-radius: 24px;
+        padding: 8px 10px 8px 14px;
+        border-radius: 28px;
         background: var(--surface);
         border: 1px solid var(--border);
         color: var(--text);
@@ -244,9 +245,9 @@
         transition: background 0.2s, border-color 0.2s, color 0.2s,
                     max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                     padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        height: 44px;
+        height: 50px;
         box-sizing: border-box;
-        max-width: 320px;
+        max-width: 340px;
         overflow: hidden;
         white-space: nowrap;
         cursor: pointer;
@@ -259,8 +260,8 @@
 
     /* Collapsed state: collapses into group icon and play/stop button wrapper */
     .info-chip.collapsed {
-        max-width: 84px;
-        padding: 6px 8px 6px 12px;
+        max-width: 96px;
+        padding: 8px 10px 8px 14px;
     }
 
     .chip-icon {
@@ -269,22 +270,22 @@
         justify-content: center;
         opacity: 0.85;
         flex-shrink: 0;
-        margin-right: 12px;
+        margin-right: 14px;
         transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .info-chip.collapsed .chip-icon {
-        margin-right: 8px;
+        margin-right: 10px;
     }
 
     .chip-content {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        max-width: 140px;
+        max-width: 150px;
         min-width: 0;
         overflow: hidden;
-        margin-right: 12px;
+        margin-right: 14px;
         transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                     transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                     max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -302,7 +303,7 @@
     }
 
     .chip-label {
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 600;
         line-height: 1.2;
         white-space: nowrap;
@@ -311,7 +312,7 @@
     }
 
     .chip-sublabel {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 500;
         opacity: 0.6;
         line-height: 1.1;
@@ -322,8 +323,8 @@
     /* Play/Stop Button Wrapper & Progress SVG */
     .play-btn-wrapper {
         position: relative;
-        width: 36px;
-        height: 36px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -351,8 +352,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: var(--accent);
         color: #ffffff;
@@ -376,7 +377,7 @@
     /* Expressive Ripple Rings (M3 Style) */
     .pulse-ring {
         position: absolute;
-        inset: -6px;
+        inset: -7px;
         border: 2.5px solid var(--accent);
         border-radius: 50%;
         opacity: 0;

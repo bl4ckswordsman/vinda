@@ -42,13 +42,12 @@
     const audio = new AudioEngine();
 
     $effect(() => {
-        audio.init().then(() => audio.loadTune(appState.selectedTune));
-        return () => audio.dispose();
+        const tune = appState.selectedTune;
+        if (tune) audio.loadTune(tune);
     });
 
     $effect(() => {
-        const tune = appState.selectedTune;
-        if (tune) audio.loadTune(tune);
+        return () => audio.dispose();
     });
 
     // ─── TUNING CONSTANTS ──────────────────────────────────────────────────────
@@ -251,7 +250,7 @@
                       ? "Theme: Dark (Click to switch to Light)"
                       : "Theme: Light (Click to System)"}
             >
-                <Icon name="theme-{appState.theme}" size={18} />
+                <Icon name="theme-{appState.theme}" size={22} />
             </button>
         </div>
     </header>
@@ -336,8 +335,8 @@
         top: 0;
         left: 0;
         right: 0;
-        padding: 16px 20px;
-        padding-top: max(16px, env(safe-area-inset-top));
+        padding: 20px 24px;
+        padding-top: max(20px, env(safe-area-inset-top));
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -346,7 +345,7 @@
     }
 
     .app-name {
-        font-size: 18px;
+        font-size: 22px;
         font-weight: 700;
         letter-spacing: -0.03em;
         color: var(--text);
@@ -355,8 +354,8 @@
 
     .icon-btn {
         pointer-events: all;
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 50px;
+        min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -364,7 +363,7 @@
         background: var(--surface);
         border: 1px solid var(--border);
         color: var(--text);
-        font-size: 18px;
+        font-size: 22px;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         transition: background 0.2s, border-color 0.2s, color 0.2s;
@@ -381,7 +380,7 @@
         bottom: 50%;
         left: 50%;
         transform: translate(-50%, 50%);
-        font-size: 14px;
+        font-size: 16px;
         color: var(--text-muted);
         letter-spacing: 0.06em;
         pointer-events: none;
@@ -402,10 +401,10 @@
     /* ── Spin badge ── */
     .spin-badge {
         position: absolute;
-        top: 72px;
+        top: 86px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         color: rgba(181, 164, 245, 0.7);
         letter-spacing: 0.05em;
@@ -419,6 +418,6 @@
         pointer-events: all;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
 </style>

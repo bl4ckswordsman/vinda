@@ -173,7 +173,7 @@
                     aria-label={cat.name}
                 >
                     <span class="chip-icon">
-                        <Icon name={cat.icon} />
+                        <Icon name={cat.icon} size={18} />
                     </span>
                     <span>{cat.name}</span>
                 </button>
@@ -203,7 +203,7 @@
                         aria-label={grp.name}
                     >
                         <span class="chip-icon">
-                            <Icon name={grp.icon} />
+                            <Icon name={grp.icon} size={18} />
                         </span>
                         <span>{grp.name}</span>
                     </button>
@@ -220,7 +220,7 @@
                     aria-pressed={tune.id === selectedTuneId}
                 >
                     <span class="chip-icon">
-                        <Icon name="Classical" size={13} />
+                        <Icon name="Classical" size={15} />
                     </span>
                     <span>{tune.label}</span>
                 </button>
@@ -235,34 +235,34 @@
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 14px 16px 32px;
+        padding: 16px 20px 36px;
         background: var(--tray-bg);
         backdrop-filter: blur(20px) saturate(160%);
         -webkit-backdrop-filter: blur(20px) saturate(160%);
         border-top: 1px solid var(--border);
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         touch-action: none;
         z-index: 10;
         transition: background 0.3s, border-color 0.3s;
     }
 
     .strip-label {
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--text-muted);
         padding-left: 4px;
-        margin-bottom: -4px;
+        margin-bottom: -2px;
         transition: color 0.3s;
     }
 
     .model-strip,
     .tune-strip {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         overflow-x: auto;
         overflow-y: hidden;
         scrollbar-width: none;
@@ -278,16 +278,16 @@
     .chip {
         display: flex;
         align-items: center;
-        gap: 7px;
-        min-height: 44px;
-        min-width: 44px;
-        padding: 8px 16px;
-        border-radius: 22px;
+        gap: 8px;
+        min-height: 50px;
+        min-width: 50px;
+        padding: 10px 20px;
+        border-radius: 25px;
         border: 1.5px solid var(--border);
         background: var(--surface);
         color: var(--text);
         opacity: 0.85;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 500;
         white-space: nowrap;
         transition:
@@ -316,15 +316,15 @@
     }
 
     .color-dot {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         flex-shrink: 0;
         box-shadow: 0 0 6px currentColor;
     }
 
     .chip-icon {
-        font-size: 14px;
+        font-size: 16px;
         flex-shrink: 0;
     }
 

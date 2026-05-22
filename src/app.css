@@ -15,6 +15,7 @@
   --text: #f0eeff;
   --text-muted: rgba(240, 238, 255, 0.5);
   --accent: #b5a4f5;
+  --accent-hover: #9c89e6;
   --radius-pill: 9999px;
   --tray-height: 120px;
   --tray-bg: rgba(13, 13, 15, 0.75);

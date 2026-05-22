@@ -165,6 +165,22 @@
             stroke="currentColor"
             stroke-width="2"
         />
+    {:else if name === "play"}
+        <!-- Play Icon -->
+        <path
+            d="M6 4l13 8-13 8V4z"
+            fill="currentColor"
+        />
+    {:else if name === "stop"}
+        <!-- Stop Icon -->
+        <rect
+            x="5"
+            y="5"
+            width="14"
+            height="14"
+            rx="2"
+            fill="currentColor"
+        />
     {:else}
         <!-- Fallback Folder -->
         <path

@@ -18,6 +18,7 @@ const DEFAULT_MODEL: ModelEntry = {
 export function createAppState() {
   // Spin / rotation
   let velocity = $state(0);
+  let isPlaying = $state(false);
 
   // Sleep / idle
   let isSleeping = $state(false);
@@ -77,6 +78,9 @@ export function createAppState() {
   return {
     get velocity() { return velocity; },
     set velocity(v: number) { velocity = v; },
+
+    get isPlaying() { return isPlaying; },
+    set isPlaying(p: boolean) { isPlaying = p; },
 
     get isSleeping() { return isSleeping; },
     set isSleeping(s: boolean) { isSleeping = s; },

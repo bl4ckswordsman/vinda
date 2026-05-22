@@ -43,10 +43,16 @@ export class AudioEngine {
     this.currentTune = tune;
 
     if (isFileTune(tune)) {
-      this.player = new Tone.Player(`/audio/${tune.file}`).connect(
-        this.reverb ?? Tone.getDestination()
-      );
+      this.player = new Tone.Player({
+        url: `/audio/${tune.file}`,
+        loop: true,
+        loopStart: 0,
+      }).connect(this.reverb ?? Tone.getDestination());
+      
       await Tone.loaded();
+      if (this.player) {
+        this.player.loopEnd = this.player.buffer.duration;
+      }
     } else {
       this.baseBpm = tune.bpm;
       Tone.getTransport().bpm.value = tune.bpm;
@@ -74,7 +80,11 @@ export class AudioEngine {
     if (!this.userInteracted) return;
 
     if (this.player) {
-      if (this.player.state !== 'started') this.player.start();
+      if (this.player.loaded) {
+        if (this.player.state !== 'started') this.player.start();
+      } else {
+        this.player.autostart = true;
+      }
     } else if (this.sequence) {
       if (this.sequence.state !== 'started') this.sequence.start(0);
       if (Tone.getTransport().state !== 'started') Tone.getTransport().start();
@@ -113,6 +123,7 @@ export class AudioEngine {
 
   pause(): void {
     if (this.player) {
+      this.player.autostart = false;
       if (this.player.state === 'started') this.player.stop();
     } else {
       if (Tone.getTransport().state === 'started') Tone.getTransport().pause();

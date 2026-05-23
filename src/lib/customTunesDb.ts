@@ -147,3 +147,24 @@ export async function importZip(zipData: ArrayBuffer | Blob): Promise<number> {
 
   return recordsToInsert.length;
 }
+
+/** Converts standard Dropbox sharing URLs into direct, CORS-friendly download URLs. */
+export function cleanDropboxUrl(url: string): string {
+  let cleaned = url.trim();
+  if (cleaned.includes('dropbox.com')) {
+    cleaned = cleaned.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    if (cleaned.includes('dl=0')) {
+      cleaned = cleaned.replace('dl=0', 'dl=1');
+    } else if (!cleaned.includes('dl=')) {
+      cleaned += (cleaned.includes('?') ? '&' : '?') + 'dl=1';
+    }
+  }
+  return cleaned;
+}
+
+/** Resolves a tune filename or URL to the correct Tone.js source URL. */
+export function resolveAudioUrl(tuneFile: string): string {
+  return tuneFile.startsWith('blob:') || tuneFile.startsWith('http')
+    ? tuneFile
+    : `/audio/${tuneFile}`;
+}

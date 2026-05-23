@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { importZip, getCustomTunes, clearCustomTunes } from './customTunesDb';
+  import { importZip, getCustomTunes, clearCustomTunes, cleanDropboxUrl } from './customTunesDb';
   import Icon from './Icon.svelte';
 
   interface Props {
@@ -33,18 +33,7 @@
     }
   }
 
-  function cleanUrl(url: string): string {
-    let cleaned = url.trim();
-    if (cleaned.includes('dropbox.com')) {
-      cleaned = cleaned.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
-      if (cleaned.includes('dl=0')) {
-        cleaned = cleaned.replace('dl=0', 'dl=1');
-      } else if (!cleaned.includes('dl=')) {
-        cleaned += (cleaned.includes('?') ? '&' : '?') + 'dl=1';
-      }
-    }
-    return cleaned;
-  }
+
 
   async function handleZipFile(file: File) {
     if (!file.name.endsWith('.zip')) {
@@ -103,7 +92,7 @@
     localStorage.setItem('vinda-custom-tunes-url', syncUrl.trim());
 
     try {
-      const targetUrl = cleanUrl(syncUrl);
+      const targetUrl = cleanDropboxUrl(syncUrl);
       const response = await fetch(targetUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch ZIP. HTTP status: ${response.status}`);

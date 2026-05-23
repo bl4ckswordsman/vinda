@@ -26,7 +26,17 @@ bun run dev
 
 # Build for production
 bun run build
+
+# Run project-wide unit/sanity tests
+bun test
+
+# Package private audio assets into a ZIP file
+bun run package-private
 ```
+
+## Testing & Private Tunes
+* **Sanity Checks**: Run `bun test` to validate your manifest JSON files, check asset paths, and ensure icon mappings match SVG definitions.
+* **Syncing Tracks**: Run `bun run package-private` to bundle local `.mp3` files from your private manifest into `private-tunes.zip`. Upload the ZIP online and click the **Sync** icon in the app to load them.
 
 <details>
 <summary><b>Assets & Attributions</b></summary>

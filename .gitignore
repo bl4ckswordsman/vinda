@@ -2,3 +2,8 @@ node_modules
 .svelte-kit
 build
 dev-dist
+
+# Private tunes
+static/audio/*.mp3
+static/audio/manifest-private.json
+private-tunes.zip

@@ -48,8 +48,12 @@ export class AudioEngine {
     this.currentTune = tune;
 
     if (isFileTune(tune)) {
+      const url = tune.file.startsWith('blob:') || tune.file.startsWith('http')
+        ? tune.file
+        : `/audio/${tune.file}`;
+
       this.player = new Tone.Player({
-        url: `/audio/${tune.file}`,
+        url,
         loop: true,
         loopStart: 0,
       }).connect(this.reverb ?? Tone.getDestination());

@@ -8,6 +8,8 @@
     import TuneInfoChip from "$lib/TuneInfoChip.svelte";
     import Icon from "$lib/Icon.svelte";
     import type { PageData } from "./$types";
+    import { getCustomTunes } from "$lib/customTunesDb";
+    import ImportModal from "$lib/ImportModal.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -15,10 +17,63 @@
     const appState = createAppState();
     setContext("app", appState);
 
-    // Populate state with models and tunes from SvelteKit page data
+    // Populate state with models from SvelteKit page data
     $effect(() => {
         if (data.models?.length) appState.models = data.models;
-        if (data.tunes?.length) appState.tunes = data.tunes;
+    });
+
+    // ─── Private/Custom Tunes Import State ──────────────────────────────────────
+    let isModalOpen = $state(false);
+    let customObjectUrls: string[] = [];
+
+    async function loadCustomTunes() {
+        if (typeof window === "undefined") return;
+        try {
+            // Revoke old object URLs to avoid memory leaks
+            customObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+            customObjectUrls = [];
+
+            const customItems = await getCustomTunes();
+            const customTunes = customItems.map((item) => {
+                const objectUrl = URL.createObjectURL(item.blob);
+                customObjectUrls.push(objectUrl);
+                return {
+                    id: item.id,
+                    label: item.label,
+                    category: item.category,
+                    group: item.group,
+                    file: objectUrl, // Used by Tone.Player
+                };
+            });
+
+            // Merge public page data tunes with custom tunes
+            const publicTunes = data.tunes || [];
+            // Remove public tunes if overridden by custom tunes with same ID
+            const publicFiltered = publicTunes.filter(
+                (t) => !customTunes.some((ct) => ct.id === t.id),
+            );
+
+            appState.tunes = [...publicFiltered, ...customTunes];
+
+            // If selected tune is no longer available (e.g. library cleared), reset to default
+            if (!appState.tunes.some((t) => t.id === appState.selectedTuneId)) {
+                appState.selectedTuneId = "default";
+            }
+        } catch (err) {
+            console.error("Failed to load custom tunes:", err);
+        }
+    }
+
+    $effect(() => {
+        if (data.tunes) {
+            loadCustomTunes();
+        }
+    });
+
+    $effect(() => {
+        return () => {
+            customObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+        };
     });
 
     function togglePlay() {
@@ -233,6 +288,18 @@
             <!-- Info Chip -->
             <TuneInfoChip {energy} maxEnergy={30000} {gestureActive} onTogglePlay={togglePlay} />
 
+            <!-- Import/Sync Private Tunes Button -->
+            <button
+                class="icon-btn"
+                onclick={() => {
+                    isModalOpen = true;
+                }}
+                aria-label="Sync private tunes library"
+                title="Sync private tunes library"
+            >
+                <Icon name="sync" size={22} />
+            </button>
+
             <!-- Theme Cycle Button -->
             <button
                 class="icon-btn"
@@ -284,6 +351,14 @@
             }}
         />
     {/if}
+
+    <ImportModal
+        isOpen={isModalOpen}
+        onClose={() => {
+            isModalOpen = false;
+        }}
+        onImportSuccess={loadCustomTunes}
+    />
 </div>
 
 <style>

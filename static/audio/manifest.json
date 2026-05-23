@@ -181,19 +181,5 @@
       "4n"
     ],
     "bpm": 100
-  },
-  {
-    "id": "kirbys-victory-dance",
-    "label": "Kirby's Victory Dance",
-    "category": "Games",
-    "group": "Kirby",
-    "file": "kirbys-dreamland-kirbys-victory-dance.mp3"
-  },
-  {
-    "id": "gourmet-race",
-    "label": "Gourmet Race",
-    "category": "Games",
-    "group": "Kirby",
-    "file": "Gourmet Race - Kirby Super Star, 1996.mp3"
   }
 ]

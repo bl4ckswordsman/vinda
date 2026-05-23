@@ -8,12 +8,14 @@
     "build": "bunx --bun vite build",
     "preview": "bunx --bun vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "icons": "bun scripts/generate-icons.ts"
+    "icons": "bun scripts/generate-icons.ts",
+    "package-private": "bun scripts/package-private.ts"
   },
   "dependencies": {
     "@threlte/core": "^8.5.14",
     "@threlte/extras": "^9.19.0",
     "@use-gesture/vanilla": "^10.3.1",
+    "jszip": "^3.10.1",
     "postprocessing": "^6.39.1",
     "three": "^0.170.0",
     "threlte-postprocessing": "^0.0.10",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.8",
     "@sveltejs/kit": "^2.0.0",
+    "@types/jszip": "^3.4.1",
     "@types/node": "^25.9.1",
     "@types/three": "^0.170.0",
     "@vite-pwa/sveltekit": "^0.6.0",

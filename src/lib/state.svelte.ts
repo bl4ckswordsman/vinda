@@ -35,6 +35,9 @@ export function createAppState() {
   // Sound type filter
   let soundTypeFilter = $state<'all' | 'music-box' | 'normal'>('all');
 
+  // Active menu tab
+  let activeMenuTab = $state<'tunes' | 'designs'>('tunes');
+
   // Theme
   let theme = $state<'system' | 'dark' | 'light'>(
     typeof window !== 'undefined'
@@ -105,6 +108,9 @@ export function createAppState() {
 
     get soundTypeFilter() { return soundTypeFilter; },
     set soundTypeFilter(f: 'all' | 'music-box' | 'normal') { soundTypeFilter = f; },
+
+    get activeMenuTab() { return activeMenuTab; },
+    set activeMenuTab(t: 'tunes' | 'designs') { activeMenuTab = t; },
 
     get theme() { return theme; },
     set theme(t: 'system' | 'dark' | 'light') { theme = t; },

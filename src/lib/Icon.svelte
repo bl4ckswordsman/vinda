@@ -10,6 +10,7 @@
     import Folder from "@lucide/svelte/icons/folder";
     import Headphones from "@lucide/svelte/icons/headphones";
     import Layers from "@lucide/svelte/icons/layers";
+    import Palette from "@lucide/svelte/icons/palette";
 
     interface Props {
         name: string;
@@ -27,6 +28,8 @@
     <Headphones {size} class="vinda-icon" />
 {:else if name === "layers"}
     <Layers {size} class="vinda-icon" />
+{:else if name === "palette"}
+    <Palette {size} class="vinda-icon" />
 {:else if name === "Games"}
     <Gamepad2 {size} class="vinda-icon" />
 {:else if name === "theme-system"}

@@ -353,6 +353,7 @@
             selectedModelId={appState.selectedModelId}
             selectedTuneId={appState.selectedTuneId}
             soundTypeFilter={appState.soundTypeFilter}
+            activeMenuTab={appState.activeMenuTab}
             onModelSelect={(id) => {
                 appState.selectedModelId = id;
             }}
@@ -361,6 +362,9 @@
             }}
             onFilterSelect={(filter) => {
                 appState.soundTypeFilter = filter;
+            }}
+            onMenuTabSelect={(tab) => {
+                appState.activeMenuTab = tab;
             }}
         />
     {/if}

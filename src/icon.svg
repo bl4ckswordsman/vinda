@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#0d0d0f"/>
   <!-- Base cylinder -->
-  <ellipse cx="256" cy="360" rx="140" ry="36" fill="#b5a4f5" opacity="0.5"/>
-  <rect x="116" y="290" width="280" height="70" rx="10" fill="#b5a4f5" opacity="0.3"/>
-  <ellipse cx="256" cy="290" rx="140" ry="36" fill="#b5a4f5" opacity="0.6"/>
+  <ellipse cx="256" cy="360" rx="140" ry="36" fill="#ff6275" opacity="0.5"/>
+  <rect x="116" y="290" width="280" height="70" rx="10" fill="#ff6275" opacity="0.3"/>
+  <ellipse cx="256" cy="290" rx="140" ry="36" fill="#ff6275" opacity="0.6"/>
   <!-- Ring -->
-  <circle cx="256" cy="220" r="100" fill="none" stroke="#b5a4f5" stroke-width="18" opacity="0.9"/>
+  <circle cx="256" cy="220" r="100" fill="none" stroke="#ff6275" stroke-width="18" opacity="0.9"/>
   <!-- Poles -->
-  <rect x="248" y="160" width="16" height="130" rx="8" fill="#d4c8ff" opacity="0.8"/>
+  <rect x="248" y="160" width="16" height="130" rx="8" fill="#ffccd2" opacity="0.8"/>
   <!-- Center ball -->
-  <circle cx="256" cy="148" r="26" fill="#e8e0ff"/>
+  <circle cx="256" cy="148" r="26" fill="#ffeef0"/>
   <circle cx="248" cy="140" r="8" fill="white" opacity="0.5"/>
 </svg>

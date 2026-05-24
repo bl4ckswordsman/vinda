@@ -406,7 +406,7 @@
 
   .dropzone.dragover {
     border-color: var(--accent);
-    background: rgba(181, 164, 245, 0.04);
+    background: rgba(255, 98, 117, 0.04);
   }
 
   .file-input {

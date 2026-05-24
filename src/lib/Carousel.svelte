@@ -305,14 +305,14 @@
     }
 
     .chip.active {
-        background: rgba(181, 164, 245, 0.15);
+        background: rgba(255, 98, 117, 0.15);
         border-color: var(--accent);
         color: var(--text);
         opacity: 1;
     }
 
     :global(.app.light) .chip.active {
-        background: rgba(121, 101, 196, 0.12);
+        background: rgba(214, 59, 81, 0.12);
     }
 
     .color-dot {

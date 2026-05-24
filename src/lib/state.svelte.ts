@@ -12,7 +12,7 @@ const DEFAULT_MODEL: ModelEntry = {
   id: 'default',
   file: '',  // empty = use procedural model
   label: 'Classic',
-  color: '#b5a4f5',
+  color: '#ff6275',
 };
 
 export function createAppState() {

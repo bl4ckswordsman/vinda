@@ -374,16 +374,16 @@
     }
 
     .app.light {
-        --bg: #f0eeff;
-        --text: #1a1030;
-        --surface: rgba(26, 16, 48, 0.06);
-        --surface-hover: rgba(26, 16, 48, 0.12);
-        --border: rgba(26, 16, 48, 0.12);
-        --border-active: rgba(26, 16, 48, 0.45);
-        --text-muted: rgba(26, 16, 48, 0.5);
-        --accent: #7965c4;
-        --accent-hover: #5d4aa3;
-        --tray-bg: rgba(240, 238, 255, 0.75);
+        --bg: #fff0f2;
+        --text: #301014;
+        --surface: rgba(48, 16, 20, 0.06);
+        --surface-hover: rgba(48, 16, 20, 0.12);
+        --border: rgba(48, 16, 20, 0.12);
+        --border-active: rgba(48, 16, 20, 0.45);
+        --text-muted: rgba(48, 16, 20, 0.5);
+        --accent: #d63b51;
+        --accent-hover: #b22238;
+        --tray-bg: rgba(255, 240, 242, 0.75);
 
         /* Danger states for light mode */
         --danger-color: #c44545;
@@ -481,7 +481,7 @@
         transform: translateX(-50%);
         font-size: 14px;
         font-weight: 600;
-        color: rgba(181, 164, 245, 0.7);
+        color: rgba(255, 98, 117, 0.7);
         letter-spacing: 0.05em;
         pointer-events: none;
         z-index: 5;

@@ -42,7 +42,7 @@
         <T.DirectionalLight
             position={[-4, 3, -3]}
             intensity={0.4}
-            color="#a090ff"
+            color="#ffa4b4"
         />
 
         <!-- Bloom post-processing -->

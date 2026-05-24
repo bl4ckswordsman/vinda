@@ -85,12 +85,14 @@
             />
         </EffectComposer>
 
-        <!-- Model -->
-        {#if modelFile}
-            <Model file={modelFile} {color} {velocity} {reducedMotion} />
-        {:else}
-            <ProceduralModel {color} {velocity} {reducedMotion} />
-        {/if}
+        <!-- Model Container - positioned slightly lower to center in visible screen area -->
+        <T.Group position.y={-0.12}>
+            {#if modelFile}
+                <Model file={modelFile} {color} {velocity} {reducedMotion} />
+            {:else}
+                <ProceduralModel {color} {velocity} {reducedMotion} />
+            {/if}
+        </T.Group>
     </Canvas>
 </div>
 

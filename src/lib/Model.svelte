@@ -36,6 +36,13 @@
 
         let foundSpinner = false;
 
+        // Temporarily detach from parent to compute local bounds accurately,
+        // avoiding parent transforms (like offsets in Scene.svelte) leaking into bounding box world space calculations.
+        const parent = scene.parent;
+        if (parent) {
+            parent.remove(scene);
+        }
+
         // Reset scale and position to ensure calculation is idempotent
         scene.scale.set(1, 1, 1);
         scene.position.set(0, 0, 0);
@@ -76,6 +83,11 @@
 
         // Capture initial Y position of the centered scene
         initialSceneY = scene.position.y;
+
+        // Re-attach to parent
+        if (parent) {
+            parent.add(scene);
+        }
     });
 
     // Per-frame rotation with inertia

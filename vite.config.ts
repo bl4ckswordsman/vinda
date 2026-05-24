@@ -26,6 +26,9 @@ export default defineConfig({
     SvelteKitPWA({
       strategies: "generateSW",
       registerType: "autoUpdate",
+      kit: {
+        adapterFallback: "index.html",
+      },
       manifest: {
         name: "Vinda — Fidget Music Box",
         short_name: "Vinda",

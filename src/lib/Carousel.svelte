@@ -14,11 +14,13 @@
         soundTypeFilter: "all" | "music-box" | "normal";
         activeMenuTab: "tunes" | "designs";
         tempoMultiplier: number;
+        isTrayCollapsed: boolean;
         onModelSelect: (id: string) => void;
         onTuneSelect: (id: string) => void;
         onFilterSelect: (filter: "all" | "music-box" | "normal") => void;
         onMenuTabSelect: (tab: "tunes" | "designs") => void;
         onTempoChange: (tempo: number) => void;
+        onToggleCollapse: () => void;
     }
 
     let {
@@ -29,11 +31,13 @@
         soundTypeFilter,
         activeMenuTab,
         tempoMultiplier,
+        isTrayCollapsed,
         onModelSelect,
         onTuneSelect,
         onFilterSelect,
         onMenuTabSelect,
         onTempoChange,
+        onToggleCollapse,
     }: Props = $props();
 
     let trayEl = $state<HTMLElement | null>(null);
@@ -174,168 +178,181 @@
 <div
     bind:this={trayEl}
     class="carousel-tray"
+    class:collapsed={isTrayCollapsed}
     role="toolbar"
     aria-label="Model and tune selector"
 >
-    {#if activeMenuTab === "designs"}
-        <div class="panel-content" transition:fade={{ duration: 150 }}>
-            <!-- Model strip -->
-            <div class="strip-label">Appearance</div>
-            <div
-                class="model-strip"
-                style="transform: translateX({modelOffset}px); transition: {modelOffset ===
-                0
-                    ? 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'
-                    : 'none'}"
-            >
-                {#each models as model (model.id)}
-                    <button
-                        class="chip"
-                        class:active={model.id === selectedModelId}
-                        onclick={() => onModelSelect(model.id)}
-                        aria-label={model.label}
-                        aria-pressed={model.id === selectedModelId}
-                    >
-                        <span class="color-dot" style="background: {model.color}"
-                        ></span>
-                        <span>{model.label}</span>
-                    </button>
-                {/each}
-            </div>
-        </div>
-    {:else}
-        <div class="panel-content" transition:fade={{ duration: 150 }}>
-            <!-- Tune strip -->
-            <div class="tune-header">
-                <div class="strip-label">{tunePath}</div>
-                <div class="segmented-control" role="tablist" aria-label="Filter tunes by type">
-                    <button
-                        class="segment-btn"
-                        class:active={soundTypeFilter === "all"}
-                        onclick={() => onFilterSelect("all")}
-                        role="tab"
-                        aria-selected={soundTypeFilter === "all"}
-                    >
-                        <Icon name="layers" size={13} />
-                        <span>All</span>
-                    </button>
-                    <button
-                        class="segment-btn"
-                        class:active={soundTypeFilter === "music-box"}
-                        onclick={() => onFilterSelect("music-box")}
-                        role="tab"
-                        aria-selected={soundTypeFilter === "music-box"}
-                    >
-                        <Icon name="music" size={13} />
-                        <span>Music Box</span>
-                    </button>
-                    <button
-                        class="segment-btn"
-                        class:active={soundTypeFilter === "normal"}
-                        onclick={() => onFilterSelect("normal")}
-                        role="tab"
-                        aria-selected={soundTypeFilter === "normal"}
-                    >
-                        <Icon name="headphones" size={13} />
-                        <span>Normal</span>
-                    </button>
-                </div>
-            </div>
+    <!-- Grab handle at the top of the tray to collapse/expand -->
+    <button
+        class="tray-handle"
+        onclick={onToggleCollapse}
+        aria-label={isTrayCollapsed ? "Expand control panel" : "Collapse control panel"}
+        aria-expanded={!isTrayCollapsed}
+    >
+        <span class="handle-bar"></span>
+    </button>
 
-            <!-- Tempo Speed Control Slider -->
-            <div class="tempo-control-row">
-                <span class="tempo-label">Speed: {tempoMultiplier.toFixed(2)}x</span>
-                <div class="slider-wrapper">
-                    <div class="slider-track-bg"></div>
-                    <div class="slider-track-fill" style="width: {((tempoMultiplier - 0.5) / 1.5) * 100}%"></div>
-                    <input
-                        type="range"
-                        min="0.5"
-                        max="2.0"
-                        step="0.05"
-                        value={tempoMultiplier}
-                        oninput={(e) => onTempoChange(parseFloat(e.currentTarget.value))}
-                        class="tempo-slider"
-                        aria-label="Tune playback speed multiplier"
-                    />
-                </div>
-                <button
-                    class="tempo-reset-btn"
-                    disabled={tempoMultiplier === 1.0}
-                    onclick={() => onTempoChange(1.0)}
-                    aria-label="Reset speed to default"
-                    title="Reset speed to default"
+    <div class="panel-wrapper">
+        {#if activeMenuTab === "designs"}
+            <div class="panel-content" transition:fade={{ duration: 150 }}>
+                <!-- Model strip -->
+                <div class="strip-label">Appearance</div>
+                <div
+                    class="model-strip"
+                    style="transform: translateX({modelOffset}px); transition: {modelOffset ===
+                    0
+                        ? 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'
+                        : 'none'}"
                 >
-                    Reset
-                </button>
-            </div>
-
-            <div class="tune-strip">
-                {#if !currentCategory}
-                    {#each categories as cat (cat.name)}
+                    {#each models as model (model.id)}
                         <button
-                            transition:fade={{ duration: 120 }}
-                            class="chip category-chip"
-                            onclick={() => currentCategory = cat.name}
-                            aria-label={cat.name}
+                            class="chip"
+                            class:active={model.id === selectedModelId}
+                            onclick={() => onModelSelect(model.id)}
+                            aria-label={model.label}
+                            aria-pressed={model.id === selectedModelId}
                         >
-                            <span class="chip-icon">
-                                <Icon name={cat.icon} size={18} />
-                            </span>
-                            <span>{cat.name}</span>
+                            <span class="color-dot" style="background: {model.color}"
+                            ></span>
+                            <span>{model.label}</span>
                         </button>
                     {/each}
-                {:else}
-                    <button
-                        transition:fade={{ duration: 120 }}
-                        class="chip back-chip"
-                        onclick={() => {
-                            if (currentGroup) {
-                                currentGroup = null;
-                            } else {
-                                currentCategory = null;
-                            }
-                        }}
-                        aria-label="Back"
-                    >
-                        ↩ {currentGroup ? currentCategory : "All"}
-                    </button>
+                </div>
+            </div>
+        {:else}
+            <div class="panel-content" transition:fade={{ duration: 150 }}>
+                <!-- Tune strip -->
+                <div class="tune-header">
+                    <div class="strip-label">{tunePath}</div>
+                    <div class="segmented-control" role="tablist" aria-label="Filter tunes by type">
+                        <button
+                            class="segment-btn"
+                            class:active={soundTypeFilter === "all"}
+                            onclick={() => onFilterSelect("all")}
+                            role="tab"
+                            aria-selected={soundTypeFilter === "all"}
+                        >
+                            <Icon name="layers" size={13} />
+                            <span>All</span>
+                        </button>
+                        <button
+                            class="segment-btn"
+                            class:active={soundTypeFilter === "music-box"}
+                            onclick={() => onFilterSelect("music-box")}
+                            role="tab"
+                            aria-selected={soundTypeFilter === "music-box"}
+                        >
+                            <Icon name="music" size={13} />
+                            <span>Music Box</span>
+                        </button>
+                        <button
+                            class="segment-btn"
+                            class:active={soundTypeFilter === "normal"}
+                            onclick={() => onFilterSelect("normal")}
+                            role="tab"
+                            aria-selected={soundTypeFilter === "normal"}
+                        >
+                            <Icon name="headphones" size={13} />
+                            <span>Normal</span>
+                        </button>
+                    </div>
+                </div>
 
-                    {#if !currentGroup && groups.length > 0}
-                        {#each groups as grp (grp.name)}
+                <!-- Tempo Speed Control Slider -->
+                <div class="tempo-control-row">
+                    <span class="tempo-label">Speed: {tempoMultiplier.toFixed(2)}x</span>
+                    <div class="slider-wrapper">
+                        <div class="slider-track-bg"></div>
+                        <div class="slider-track-fill" style="width: {((tempoMultiplier - 0.5) / 1.5) * 100}%"></div>
+                        <input
+                            type="range"
+                            min="0.5"
+                            max="2.0"
+                            step="0.05"
+                            value={tempoMultiplier}
+                            oninput={(e) => onTempoChange(parseFloat(e.currentTarget.value))}
+                            class="tempo-slider"
+                            aria-label="Tune playback speed multiplier"
+                        />
+                    </div>
+                    <button
+                        class="tempo-reset-btn"
+                        disabled={tempoMultiplier === 1.0}
+                        onclick={() => onTempoChange(1.0)}
+                        aria-label="Reset speed to default"
+                        title="Reset speed to default"
+                    >
+                        Reset
+                    </button>
+                </div>
+
+                <div class="tune-strip">
+                    {#if !currentCategory}
+                        {#each categories as cat (cat.name)}
                             <button
                                 transition:fade={{ duration: 120 }}
-                                class="chip group-chip"
-                                onclick={() => currentGroup = grp.name}
-                                aria-label={grp.name}
+                                class="chip category-chip"
+                                onclick={() => currentCategory = cat.name}
+                                aria-label={cat.name}
                             >
                                 <span class="chip-icon">
-                                    <Icon name={grp.icon} size={18} />
+                                    <Icon name={cat.icon} size={18} />
                                 </span>
-                                <span>{grp.name}</span>
+                                <span>{cat.name}</span>
+                            </button>
+                        {/each}
+                    {:else}
+                        <button
+                            transition:fade={{ duration: 120 }}
+                            class="chip back-chip"
+                            onclick={() => {
+                                if (currentGroup) {
+                                    currentGroup = null;
+                                } else {
+                                    currentCategory = null;
+                                }
+                            }}
+                            aria-label="Back"
+                        >
+                            ↩ {currentGroup ? currentCategory : "All"}
+                        </button>
+
+                        {#if !currentGroup && groups.length > 0}
+                            {#each groups as grp (grp.name)}
+                                <button
+                                    transition:fade={{ duration: 120 }}
+                                    class="chip group-chip"
+                                    onclick={() => currentGroup = grp.name}
+                                    aria-label={grp.name}
+                                >
+                                    <span class="chip-icon">
+                                        <Icon name={grp.icon} size={18} />
+                                    </span>
+                                    <span>{grp.name}</span>
+                                </button>
+                            {/each}
+                        {/if}
+
+                        {#each visibleTunes as tune (tune.id)}
+                            <button
+                                transition:fade={{ duration: 120 }}
+                                class="chip tune-chip"
+                                class:active={tune.id === selectedTuneId}
+                                onclick={() => onTuneSelect(tune.id)}
+                                aria-label={tune.label}
+                                aria-pressed={tune.id === selectedTuneId}
+                            >
+                                <span class="chip-icon">
+                                    <Icon name={getSoundType(tune) === "music-box" ? "music" : "headphones"} size={15} />
+                                </span>
+                                <span>{tune.label}</span>
                             </button>
                         {/each}
                     {/if}
-
-                    {#each visibleTunes as tune (tune.id)}
-                        <button
-                            transition:fade={{ duration: 120 }}
-                            class="chip tune-chip"
-                            class:active={tune.id === selectedTuneId}
-                            onclick={() => onTuneSelect(tune.id)}
-                            aria-label={tune.label}
-                            aria-pressed={tune.id === selectedTuneId}
-                        >
-                            <span class="chip-icon">
-                                <Icon name={getSoundType(tune) === "music-box" ? "music" : "headphones"} size={15} />
-                            </span>
-                            <span>{tune.label}</span>
-                        </button>
-                    {/each}
-                {/if}
+                </div>
             </div>
-        </div>
-    {/if}
+        {/if}
+    </div>
 
     <!-- Bottom tab switcher -->
     <div class="menu-tabs" role="tablist" aria-label="Controls Mode">
@@ -363,23 +380,107 @@
 </div>
 
 <style>
+    .panel-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .panel-content {
+        grid-column: 1;
+        grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 122px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     .carousel-tray {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 16px 20px max(18px, env(safe-area-inset-bottom));
+        padding: 8px 20px max(18px, env(safe-area-inset-bottom));
         background: var(--tray-bg);
         backdrop-filter: blur(20px) saturate(160%);
         -webkit-backdrop-filter: blur(20px) saturate(160%);
         border-top: 1px solid var(--border);
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
         /* Allow browser to handle horizontal scrolls (pan-x), let JS handle vertical swipes */
         touch-action: pan-x;
         z-index: 10;
-        transition: background 0.3s, border-color 0.3s, padding 0.3s;
+        transition:
+            transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+            background 0.3s,
+            border-color 0.3s,
+            padding 0.3s;
+    }
+
+    .carousel-tray.collapsed {
+        transform: translateY(calc(100% - 24px - env(safe-area-inset-bottom)));
+        background: rgba(13, 13, 15, 0.35);
+        border-color: transparent;
+        backdrop-filter: blur(10px) saturate(120%);
+        -webkit-backdrop-filter: blur(10px) saturate(120%);
+    }
+
+    :global(.app.light) .carousel-tray.collapsed {
+        background: rgba(240, 247, 252, 0.35);
+    }
+
+    .carousel-tray.collapsed .panel-wrapper,
+    .carousel-tray.collapsed .menu-tabs {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px);
+    }
+
+    /* Grab handle styling */
+    .tray-handle {
+        width: 100%;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        outline: none;
+        flex-shrink: 0;
+        margin-bottom: 2px;
+    }
+
+    .handle-bar {
+        width: 38px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--text-muted);
+        opacity: 0.3;
+        transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s;
+    }
+
+    .tray-handle:hover .handle-bar {
+        opacity: 0.7;
+        background-color: var(--accent);
+    }
+
+    .tray-handle:active .handle-bar {
+        transform: scaleX(1.2) scaleY(0.85);
+    }
+
+    /* Menu tabs transition for parallax effect during collapse */
+    .menu-tabs {
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .strip-label {

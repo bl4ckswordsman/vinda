@@ -360,6 +360,7 @@
             soundTypeFilter={appState.soundTypeFilter}
             activeMenuTab={appState.activeMenuTab}
             tempoMultiplier={appState.tempoMultiplier}
+            isTrayCollapsed={appState.isTrayCollapsed}
             onModelSelect={(id) => {
                 appState.selectedModelId = id;
             }}
@@ -374,6 +375,9 @@
             }}
             onTempoChange={(tempo) => {
                 appState.tempoMultiplier = tempo;
+            }}
+            onToggleCollapse={() => {
+                appState.isTrayCollapsed = !appState.isTrayCollapsed;
             }}
         />
     {/if}

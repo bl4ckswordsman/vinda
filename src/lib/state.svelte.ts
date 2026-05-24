@@ -53,6 +53,13 @@ export function createAppState() {
       : false
   );
 
+  // Tray collapsed state
+  let isTrayCollapsed = $state<boolean>(
+    typeof window !== 'undefined'
+      ? localStorage.getItem('vinda-tray-collapsed') === 'true'
+      : false
+  );
+
   $effect(() => {
     if (typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -69,6 +76,12 @@ export function createAppState() {
   $effect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('vinda-theme', theme);
+    }
+  });
+
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vinda-tray-collapsed', String(isTrayCollapsed));
     }
   });
 
@@ -117,6 +130,9 @@ export function createAppState() {
 
     get tempoMultiplier() { return tempoMultiplier; },
     set tempoMultiplier(v: number) { tempoMultiplier = v; },
+
+    get isTrayCollapsed() { return isTrayCollapsed; },
+    set isTrayCollapsed(c: boolean) { isTrayCollapsed = c; },
 
     get theme() { return theme; },
     set theme(t: 'system' | 'dark' | 'light') { theme = t; },

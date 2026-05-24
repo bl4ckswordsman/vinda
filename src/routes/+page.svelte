@@ -279,6 +279,11 @@
         </div>
     {/if}
 
+    <!-- Soft glowing sun in light mode -->
+    {#if !appState.darkMode && !appState.isSleeping}
+        <div class="sun" transition:fade={{ duration: 1000 }}></div>
+    {/if}
+
     <!-- 3D canvas layer — gesture target -->
     <div bind:this={canvasWrapper} class="canvas-target" aria-hidden="true">
         <Scene
@@ -395,16 +400,16 @@
     }
 
     .app.light {
-        --bg: #fff0f2;
-        --text: #301014;
-        --surface: rgba(48, 16, 20, 0.06);
-        --surface-hover: rgba(48, 16, 20, 0.12);
-        --border: rgba(48, 16, 20, 0.12);
-        --border-active: rgba(48, 16, 20, 0.45);
-        --text-muted: rgba(48, 16, 20, 0.5);
+        --bg: radial-gradient(circle at top right, #e0f2fe 0%, #f0f7fc 100%);
+        --text: #1e293b;
+        --surface: rgba(30, 41, 59, 0.06);
+        --surface-hover: rgba(30, 41, 59, 0.12);
+        --border: rgba(30, 41, 59, 0.12);
+        --border-active: rgba(30, 41, 59, 0.45);
+        --text-muted: rgba(30, 41, 59, 0.5);
         --accent: #d63b51;
         --accent-hover: #b22238;
-        --tray-bg: rgba(255, 240, 242, 0.75);
+        --tray-bg: rgba(240, 247, 252, 0.75);
 
         /* Danger states for light mode */
         --danger-color: #c44545;
@@ -515,5 +520,36 @@
         display: flex;
         align-items: center;
         gap: 10px;
+    }
+
+    /* ── Sun Glow in Light Mode ── */
+    .sun {
+        position: absolute;
+        top: -120px;
+        right: -120px;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(
+            circle,
+            rgba(255, 253, 224, 0.75) 0%,
+            rgba(255, 248, 180, 0.3) 35%,
+            rgba(255, 255, 255, 0) 70%
+        );
+        filter: blur(15px);
+        pointer-events: none;
+        z-index: 0;
+        animation: sun-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes sun-pulse {
+        0%, 100% {
+            transform: scale(1.0);
+            opacity: 0.85;
+        }
+        50% {
+            transform: scale(1.08);
+            opacity: 1.0;
+        }
     }
 </style>

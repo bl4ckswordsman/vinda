@@ -84,7 +84,21 @@ export default defineConfig({
   ],
 
   optimizeDeps: {
-    exclude: ["@threlte/core", "@threlte/extras", "threlte-postprocessing"],
+    exclude: [
+      "@threlte/core",
+      "@threlte/extras",
+      "threlte-postprocessing",
+      "@lucide/svelte",
+      "@lucide/svelte/icons/play",
+      "@lucide/svelte/icons/square",
+      "@lucide/svelte/icons/rotate-cw",
+      "@lucide/svelte/icons/monitor",
+      "@lucide/svelte/icons/moon",
+      "@lucide/svelte/icons/sun",
+      "@lucide/svelte/icons/music",
+      "@lucide/svelte/icons/gamepad-2",
+      "@lucide/svelte/icons/folder"
+    ],
   },
 
   ssr: {

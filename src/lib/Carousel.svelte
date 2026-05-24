@@ -21,6 +21,7 @@
         onMenuTabSelect: (tab: "tunes" | "designs") => void;
         onTempoChange: (tempo: number) => void;
         onToggleCollapse: () => void;
+        onImportClick: () => void;
     }
 
     let {
@@ -38,6 +39,7 @@
         onMenuTabSelect,
         onTempoChange,
         onToggleCollapse,
+        onImportClick,
     }: Props = $props();
 
     let trayEl = $state<HTMLElement | null>(null);
@@ -301,6 +303,19 @@
                                 <span>{cat.name}</span>
                             </button>
                         {/each}
+
+                        <!-- Special Action: Import / Sync Private Tunes -->
+                        <button
+                            transition:fade={{ duration: 120 }}
+                            class="chip import-trigger-chip"
+                            onclick={onImportClick}
+                            aria-label="Import or sync private tunes"
+                        >
+                            <span class="chip-icon">
+                                <Icon name="sync" size={18} />
+                            </span>
+                            <span>Import/Sync</span>
+                        </button>
                     {:else}
                         <button
                             transition:fade={{ duration: 120 }}
@@ -625,6 +640,24 @@
     .back-chip:hover {
         background: var(--danger-bg-hover);
         border-color: var(--danger-border-hover);
+    }
+
+    .import-trigger-chip {
+        border-style: dashed;
+        border-color: var(--accent);
+        color: var(--accent);
+        background: transparent;
+        opacity: 0.8;
+    }
+
+    .import-trigger-chip:hover {
+        background: rgba(255, 98, 117, 0.08);
+        border-color: var(--accent);
+        opacity: 1;
+    }
+
+    :global(.app.light) .import-trigger-chip:hover {
+        background: rgba(214, 59, 81, 0.08);
     }
 
     /* ── Tab Switcher at the bottom ── */

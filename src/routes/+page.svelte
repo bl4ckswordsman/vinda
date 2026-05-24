@@ -302,18 +302,6 @@
             <!-- Info Chip -->
             <TuneInfoChip {energy} maxEnergy={30000} {gestureActive} onTogglePlay={togglePlay} />
 
-            <!-- Import/Sync Private Tunes Button -->
-            <button
-                class="icon-btn"
-                onclick={() => {
-                    isModalOpen = true;
-                }}
-                aria-label="Sync private tunes library"
-                title="Sync private tunes library"
-            >
-                <Icon name="sync" size={22} />
-            </button>
-
             <!-- Theme Cycle Button -->
             <button
                 class="icon-btn"
@@ -378,6 +366,9 @@
             }}
             onToggleCollapse={() => {
                 appState.isTrayCollapsed = !appState.isTrayCollapsed;
+            }}
+            onImportClick={() => {
+                isModalOpen = true;
             }}
         />
     {/if}

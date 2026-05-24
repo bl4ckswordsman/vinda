@@ -9,9 +9,9 @@ const DEFAULT_TUNE: TuneEntry = {
 };
 
 const DEFAULT_MODEL: ModelEntry = {
-  id: 'default',
-  file: '',  // empty = use procedural model
-  label: 'Classic',
+  id: 'carousel',
+  file: 'carousel_music_box-1-spinner.glb',
+  label: 'Carousel 1',
   color: '#ff6275',
 };
 
@@ -26,7 +26,7 @@ export function createAppState() {
 
   // Model selection
   let models = $state<ModelEntry[]>([DEFAULT_MODEL]);
-  let selectedModelId = $state('default');
+  let selectedModelId = $state('carousel');
 
   // Tune selection
   let tunes = $state<TuneEntry[]>([DEFAULT_TUNE]);

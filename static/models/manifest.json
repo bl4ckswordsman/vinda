@@ -1,14 +1,14 @@
 [
   {
-    "id": "default",
-    "file": "",
-    "label": "Classic",
+    "id": "carousel",
+    "file": "carousel_music_box-1-spinner.glb",
+    "label": "Carousel 1",
     "color": "#ff6275"
   },
   {
-    "id": "carousel",
-    "file": "carousel_music_box-1-spinner.glb",
-    "label": "Carousel",
+    "id": "default",
+    "file": "",
+    "label": "Classic",
     "color": "#4a90e2"
   }
 ]

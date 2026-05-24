@@ -71,11 +71,17 @@ describe("Audio Manifest Integrity Sanity Checks", () => {
       for (const tune of manifest) {
         expect(tune).toHaveProperty("id");
         expect(tune).toHaveProperty("label");
-        expect(tune).toHaveProperty("file");
 
-        // Verify that the referenced file exists in the static folder
-        const audioFilePath = path.join("static/audio", tune.file);
-        expect(fs.existsSync(audioFilePath)).toBe(true);
+        if (tune.file) {
+          // If it is a file-based tune, verify the file exists on disk
+          const audioFilePath = path.join("static/audio", tune.file);
+          expect(fs.existsSync(audioFilePath)).toBe(true);
+        } else {
+          // Otherwise, it must be a valid sequenced tune
+          expect(tune).toHaveProperty("notes");
+          expect(tune).toHaveProperty("durations");
+          expect(tune).toHaveProperty("bpm");
+        }
       }
     } else {
       console.log("ℹ️ manifest-private.json not present in static/audio/, skipping private verification");

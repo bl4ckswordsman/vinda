@@ -56,6 +56,10 @@ async function run() {
 
   // Add each MP3 file to the ZIP
   for (const tune of privateTunes) {
+    if (!tune.file) {
+      console.log(`   Sequenced tune (no audio file to zip): ${tune.label}`);
+      continue;
+    }
     const filePath = path.join(AUDIO_DIR, tune.file);
     if (!fs.existsSync(filePath)) {
       console.warn(`⚠️ Warning: Audio file not found: ${filePath}. Skipping this file.`);

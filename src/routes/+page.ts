@@ -7,13 +7,23 @@ export const load: PageLoad = async ({ fetch }) => {
         fetch('/audio/manifest.json')
     ]);
 
-    const [models, tunes] = await Promise.all([
+    const [models, publicTunes] = await Promise.all([
         modelsRes.json() as Promise<ModelEntry[]>,
         tunesRes.json() as Promise<TuneEntry[]>
     ]);
 
+    let privateTunes: TuneEntry[] = [];
+    try {
+        const privateRes = await fetch('/audio/manifest-private.json');
+        if (privateRes.ok) {
+            privateTunes = await privateRes.json() as TuneEntry[];
+        }
+    } catch (e) {
+        // manifest-private.json not present, ignore
+    }
+
     return {
         models,
-        tunes
+        tunes: [...publicTunes, ...privateTunes]
     };
 };

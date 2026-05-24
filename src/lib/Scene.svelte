@@ -26,7 +26,16 @@
     }: Props = $props();
 
     const appState = getContext<AppState>("app");
+
+    let innerWidth = $state(typeof window !== "undefined" ? window.innerWidth : 1000);
+    let innerHeight = $state(typeof window !== "undefined" ? window.innerHeight : 1000);
+    const aspect = $derived(innerWidth / innerHeight);
+    
+    // Adjust camera Z based on aspect ratio to prevent clipping in portrait mode
+    const cameraZ = $derived(aspect >= 1 ? 4 : Math.min(5.2, 4 / Math.sqrt(aspect)));
 </script>
+
+<svelte:window bind:innerWidth bind:innerHeight />
 
 <div class="canvas-wrapper" class:sleeping={isSleeping}>
     <Canvas
@@ -38,7 +47,7 @@
         <Environment url="/hdri/studio.hdr" />
 
         <!-- Fixed product-shot camera -->
-        <T.PerspectiveCamera makeDefault position={[0, -0.2, 4]} fov={35} />
+        <T.PerspectiveCamera makeDefault position={[0, -0.2, cameraZ]} fov={35} />
 
         <!-- Lighting -->
         {#if appState}

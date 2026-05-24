@@ -5,7 +5,11 @@ export interface CustomTune {
   label: string;
   category: string;
   group?: string;
-  blob: Blob;
+  blob?: Blob;
+  notes?: string[];
+  durations?: string[];
+  bpm?: number;
+  soundType?: 'music-box' | 'normal';
 }
 
 const isBrowser = typeof window !== 'undefined';
@@ -97,39 +101,58 @@ export async function importZip(zipData: ArrayBuffer | Blob): Promise<number> {
   const recordsToInsert: CustomTune[] = [];
 
   for (const entry of manifest) {
-    if (!entry.id || !entry.label || !entry.file) {
+    if (!entry.id || !entry.label) {
       continue; // Skip invalid entries
     }
 
-    // Locate the matching audio file inside the ZIP (basename case-insensitive match)
-    const fileBase = entry.file.split('/').pop()?.toLowerCase() || entry.file.toLowerCase();
-    let audioFile: JSZip.JSZipObject | null = null;
-    const audioPaths = Object.keys(zip.files);
-    for (const path of audioPaths) {
-      const pathBase = path.split('/').pop()?.toLowerCase() || path.toLowerCase();
-      if (pathBase === fileBase) {
-        if (Object.prototype.hasOwnProperty.call(zip.files, path)) {
-          audioFile = zip.file(path);
-          break;
+    if (entry.file) {
+      // Locate the matching audio file inside the ZIP (basename case-insensitive match)
+      const fileBase = entry.file.split('/').pop()?.toLowerCase() || entry.file.toLowerCase();
+      let audioFile: JSZip.JSZipObject | null = null;
+      const audioPaths = Object.keys(zip.files);
+      for (const path of audioPaths) {
+        // Skip macOS/OS resource forks and hidden files
+        const isResourceFork = path.includes('__MACOSX') || path.split('/').pop()?.startsWith('._') || path.split('/').pop()?.startsWith('.');
+        if (isResourceFork) continue;
+
+        const pathBase = path.split('/').pop()?.toLowerCase() || path.toLowerCase();
+        if (pathBase === fileBase) {
+          if (Object.prototype.hasOwnProperty.call(zip.files, path)) {
+            audioFile = zip.file(path);
+            break;
+          }
         }
       }
+
+      if (!audioFile) {
+        console.warn(`Audio file ${entry.file} not found in the ZIP archive. Skipping.`);
+        continue;
+      }
+
+      // Extract the blob asynchronously BEFORE starting the transaction
+      const blob = await audioFile.async('blob');
+
+      recordsToInsert.push({
+        id: entry.id,
+        label: entry.label,
+        category: entry.category || 'Games',
+        group: entry.group,
+        soundType: entry.soundType,
+        blob
+      });
+    } else if (entry.notes && entry.durations) {
+      // Sequenced tune
+      recordsToInsert.push({
+        id: entry.id,
+        label: entry.label,
+        category: entry.category || 'Games',
+        group: entry.group,
+        soundType: entry.soundType || 'music-box',
+        notes: entry.notes,
+        durations: entry.durations,
+        bpm: entry.bpm || 80
+      });
     }
-
-    if (!audioFile) {
-      console.warn(`Audio file ${entry.file} not found in the ZIP archive. Skipping.`);
-      continue;
-    }
-
-    // Extract the blob asynchronously BEFORE starting the transaction
-    const blob = await audioFile.async('blob');
-
-    recordsToInsert.push({
-      id: entry.id,
-      label: entry.label,
-      category: entry.category || 'Games',
-      group: entry.group,
-      blob
-    });
   }
 
   // Clear previous custom tunes before writing the new pack

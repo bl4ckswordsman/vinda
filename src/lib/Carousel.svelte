@@ -124,17 +124,16 @@
         // Instantiate DragGesture with the target element
         const gesture = new DragGesture(
             trayEl,
-            ({ active, movement: [mx, my], last, event }) => {
+            ({ active, movement: [mx, my], last, event, cancel }) => {
                 const target = event.target as HTMLElement;
-                const onStrip = target.closest('.model-strip, .tune-strip');
+
+                // Cancel the drag gesture immediately if touching inputs, buttons, sliders, or scrollable strips
+                if (target.closest('.model-strip, .tune-strip, .tempo-slider, .tempo-reset-btn, .segmented-control, .tray-handle, .menu-tabs')) {
+                    cancel();
+                    return;
+                }
 
                 if (Math.abs(mx) > Math.abs(my)) {
-                    // If the user drags horizontally on a scrollable strip, let the browser handle it
-                    if (onStrip) {
-                        modelOffset = 0;
-                        return;
-                    }
-
                     // Horizontal drag on the tray background → model selector (only in designs tab)
                     if (activeMenuTab !== "designs") return;
                     modelOffset = active ? mx * 0.4 : 0;
@@ -516,6 +515,25 @@
         padding-right: 4px;
         margin-top: 4px;
         margin-bottom: 12px; /* Increased from -2px to fix overlapping with tune chips */
+    }
+
+    @media (max-width: 480px) {
+        .tune-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .segmented-control {
+            width: 100%;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        .segment-btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 11px;
+            padding: 6px 4px;
+        }
     }
 
     .segmented-control {

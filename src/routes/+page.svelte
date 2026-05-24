@@ -37,15 +37,29 @@
 
             const customItems = await getCustomTunes();
             const customTunes = customItems.map((item) => {
-                const objectUrl = URL.createObjectURL(item.blob);
-                customObjectUrls.push(objectUrl);
-                return {
-                    id: item.id,
-                    label: item.label,
-                    category: item.category,
-                    group: item.group,
-                    file: objectUrl, // Used by Tone.Player
-                };
+                if (item.blob) {
+                    const objectUrl = URL.createObjectURL(item.blob);
+                    customObjectUrls.push(objectUrl);
+                    return {
+                        id: item.id,
+                        label: item.label,
+                        category: item.category,
+                        group: item.group,
+                        soundType: item.soundType,
+                        file: objectUrl, // Used by Tone.Player
+                    };
+                } else {
+                    return {
+                        id: item.id,
+                        label: item.label,
+                        category: item.category,
+                        group: item.group,
+                        soundType: item.soundType || 'music-box',
+                        notes: item.notes || [],
+                        durations: item.durations || [],
+                        bpm: item.bpm || 80,
+                    };
+                }
             });
 
             // Merge public page data tunes with custom tunes

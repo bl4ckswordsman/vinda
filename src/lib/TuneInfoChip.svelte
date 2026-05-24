@@ -131,7 +131,7 @@
         return points.join(" ");
     }
 
-    const wavyPath = $derived(generateWavyCirclePath(21, 21, 18.0, waveAmp, 8, phase));
+    const wavyPath = $derived(generateWavyCirclePath(21, 21, 18.6, waveAmp, 8, phase));
 
     const isAnimationActive = $derived(appState.isPlaying || energy > 0 || gestureActive);
 
@@ -191,43 +191,39 @@
 
     <!-- Play/Stop Toggle with Wavy Progress Indicator -->
     <div class="play-btn-wrapper">
-        <svg class="wavy-progress-svg" viewBox="0 0 42 42" aria-hidden="true">
-            <!-- Wavy background track (subtle) -->
-            <path
-                d={wavyPath}
-                fill="none"
-                stroke="var(--border)"
-                stroke-width="1.5"
-                opacity="0.3"
-            />
-            <!-- Wavy active progress indicator -->
-            <path
-                d={wavyPath}
-                fill="none"
-                stroke="var(--accent)"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                pathLength="100"
-                stroke-dasharray="100"
-                stroke-dashoffset={100 - (progress * 100)}
-                opacity={progress > 0.001 ? 1 : 0}
-            />
+        <svg class="wavy-progress-svg" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+            <g transform="rotate(-90 21 21)">
+                <!-- Wavy background track (subtle) -->
+                <path
+                    d={wavyPath}
+                    fill="none"
+                    stroke="var(--border)"
+                    stroke-width="1.5"
+                    opacity="0.3"
+                />
+                <!-- Wavy active progress indicator -->
+                <path
+                    d={wavyPath}
+                    fill="none"
+                    stroke="var(--accent)"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    pathLength="100"
+                    stroke-dasharray="100"
+                    stroke-dashoffset={100 - (progress * 100)}
+                    opacity={progress > 0.001 ? 1 : 0}
+                />
+            </g>
         </svg>
 
-        <button
-            class="play-btn"
-            onclick={onTogglePlay}
-            aria-label={isPlayingOrWound ? "Stop music" : "Play music"}
-            title={isPlayingOrWound ? "Stop music" : "Play music"}
-        >
-            {#if isPlayingOrWound}
-                <span class="pulse-ring ring-1"></span>
-                <span class="pulse-ring ring-2"></span>
-                <Icon name="stop" size={14} />
-            {:else}
-                <Icon name="play" size={14} />
-            {/if}
-        </button>
+        <div class="play-btn-container">
+            <button
+                class="play-btn"
+                onclick={onTogglePlay}
+                aria-label={isPlayingOrWound ? "Stop music" : "Play music"}
+                title={isPlayingOrWound ? "Stop music" : "Play music"}
+            >{#if isPlayingOrWound}<span class="pulse-ring ring-1"></span><span class="pulse-ring ring-2"></span><Icon name="stop" size={14} />{:else}<Icon name="play" size={14} />{/if}</button>
+        </div>
     </div>
 </div>
 
@@ -325,25 +321,36 @@
         position: relative;
         width: 42px;
         height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
         flex-shrink: 0;
     }
 
     .wavy-progress-svg {
         position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
+        top: 50%;
+        left: 50%;
+        width: 42px;
+        height: 42px;
+        transform: translate(-50%, -50%);
+        display: block;
         pointer-events: none;
-        transform: rotate(-90deg); /* Start progress at 12 o'clock */
     }
 
     /* Animate progress stroke color transitions smoothly */
     .wavy-progress-svg path {
         transition: stroke-dashoffset 0.15s ease-out, stroke 0.2s, opacity 0.2s;
+    }
+
+    .play-btn-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 32px;
+        height: 32px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* Play/Stop Button inside Chip */
@@ -352,8 +359,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
+        width: 100%;
+        height: 100%;
         border-radius: 50%;
         background: var(--accent);
         color: #ffffff;
@@ -362,7 +369,13 @@
         transition: transform 0.2s, background-color 0.2s;
         outline: none;
         padding: 0;
-        flex-shrink: 0;
+        margin: 0;
+        font-size: 0;       /* Eliminate button text metrics baseline offset */
+        line-height: 0;      /* Eliminate button text metrics baseline offset */
+    }
+
+    .play-btn :global(.vinda-icon) {
+        display: block;
     }
 
     .play-btn:hover {

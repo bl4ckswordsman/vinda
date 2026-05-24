@@ -12,5 +12,6 @@
     "target": "ESNext",
     "moduleResolution": "bundler",
     "types": ["vite-plugin-pwa/info", "vite-plugin-pwa/client"]
-  }
+  },
+  "exclude": ["node_modules", ".svelte-kit", "build", "tests"]
 }

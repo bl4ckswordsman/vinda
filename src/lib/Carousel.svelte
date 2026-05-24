@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { DragGesture } from "@use-gesture/vanilla";
     import { fade } from "svelte/transition";
     import type { ModelEntry, TuneEntry } from "./types";
     import { getSoundType } from "./types";
     import { CATEGORY_ICONS, GROUP_ICONS } from "./icons";
     import Icon from "./Icon.svelte";
-
+ 
     interface Props {
         models: ModelEntry[];
         tunes: TuneEntry[];
@@ -23,7 +22,7 @@
         onToggleCollapse: () => void;
         onImportClick: () => void;
     }
-
+ 
     let {
         models,
         tunes,
@@ -41,9 +40,8 @@
         onToggleCollapse,
         onImportClick,
     }: Props = $props();
-
+ 
     let trayEl = $state<HTMLElement | null>(null);
-    let modelOffset = $state(0);
 
     let currentCategory = $state<string | null>(null);
     let currentGroup = $state<string | null>(null);
@@ -118,62 +116,7 @@
         }
     });
 
-    $effect(() => {
-        if (!trayEl) return;
 
-        // Instantiate DragGesture with the target element
-        const gesture = new DragGesture(
-            trayEl,
-            ({ active, movement: [mx, my], last, event, cancel }) => {
-                const target = event.target as HTMLElement;
-
-                // Cancel the drag gesture immediately if touching inputs, buttons, sliders, or scrollable strips
-                if (target.closest('.model-strip, .tune-strip, .tempo-slider, .tempo-reset-btn, .segmented-control, .tray-handle, .menu-tabs')) {
-                    cancel();
-                    return;
-                }
-
-                if (Math.abs(mx) > Math.abs(my)) {
-                    // Horizontal drag on the tray background → model selector (only in designs tab)
-                    if (activeMenuTab !== "designs") return;
-                    modelOffset = active ? mx * 0.4 : 0;
-
-                    if (last && Math.abs(mx) > 55) {
-                        const dir = mx < 0 ? 1 : -1;
-                        const currentIdx = models.findIndex(
-                            (m) => m.id === selectedModelId,
-                        );
-                        const nextIdx = Math.max(
-                            0,
-                            Math.min(models.length - 1, currentIdx + dir),
-                        );
-                        onModelSelect(models[nextIdx].id);
-                    }
-                } else if (last && Math.abs(my) > 55) {
-                    // Vertical drag → tune selector (within active filter, only in tunes tab)
-                    if (activeMenuTab !== "tunes") return;
-                    const dir = my < 0 ? 1 : -1;
-                    const currentIdx = filteredTunes.findIndex(
-                        (t) => t.id === selectedTuneId,
-                    );
-                    if (currentIdx !== -1 && filteredTunes.length > 0) {
-                        const nextIdx = Math.max(
-                            0,
-                            Math.min(filteredTunes.length - 1, currentIdx + dir),
-                        );
-                        onTuneSelect(filteredTunes[nextIdx].id);
-                    }
-                }
-            },
-            {
-                eventOptions: { passive: true },
-                pointer: { touch: true },
-            },
-        );
-
-        // Cleanup function for the effect
-        return () => gesture.destroy();
-    });
 </script>
 
 <div
@@ -198,13 +141,7 @@
             <div class="panel-content" transition:fade={{ duration: 150 }}>
                 <!-- Model strip -->
                 <div class="strip-label">Appearance</div>
-                <div
-                    class="model-strip"
-                    style="transform: translateX({modelOffset}px); transition: {modelOffset ===
-                    0
-                        ? 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'
-                        : 'none'}"
-                >
+                <div class="model-strip">
                     {#each models as model (model.id)}
                         <button
                             class="chip"
@@ -396,11 +333,13 @@
 <style>
     .panel-wrapper {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: 1fr;
         transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         opacity: 1;
         transform: translateY(0);
+        width: 100%;
+        min-width: 0;
     }
 
     .panel-content {
@@ -412,6 +351,7 @@
         min-height: 122px;
         width: 100%;
         box-sizing: border-box;
+        min-width: 0;
     }
 
     .carousel-tray {
@@ -427,8 +367,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
-        /* Allow browser to handle horizontal scrolls (pan-x), let JS handle vertical swipes */
-        touch-action: pan-x;
+        touch-action: manipulation;
         z-index: 10;
         transition:
             transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
@@ -589,6 +528,11 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
         padding-bottom: 2px;
+        touch-action: pan-x;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
 
     .model-strip::-webkit-scrollbar,

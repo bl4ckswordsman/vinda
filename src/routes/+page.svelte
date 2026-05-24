@@ -403,7 +403,7 @@
         height: 100dvh;
         overflow: hidden;
         background: var(--bg);
-        touch-action: none;
+        touch-action: manipulation;
         user-select: none;
         -webkit-user-select: none;
     }

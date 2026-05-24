@@ -3,6 +3,7 @@
     "id": "default",
     "label": "Für Elise",
     "category": "Classical",
+    "soundType": "music-box",
     "notes": [
       "E5",
       "D#5",
@@ -49,6 +50,7 @@
     "id": "twinkle",
     "label": "Twinkle",
     "category": "Classical",
+    "soundType": "music-box",
     "notes": [
       "C5",
       "C5",
@@ -102,6 +104,7 @@
     "id": "ode",
     "label": "Ode to Joy",
     "category": "Classical",
+    "soundType": "music-box",
     "notes": [
       "E4",
       "E4",

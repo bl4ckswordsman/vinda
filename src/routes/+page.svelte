@@ -343,11 +343,15 @@
             tunes={appState.tunes}
             selectedModelId={appState.selectedModelId}
             selectedTuneId={appState.selectedTuneId}
+            soundTypeFilter={appState.soundTypeFilter}
             onModelSelect={(id) => {
                 appState.selectedModelId = id;
             }}
             onTuneSelect={(id) => {
                 appState.selectedTuneId = id;
+            }}
+            onFilterSelect={(filter) => {
+                appState.soundTypeFilter = filter;
             }}
         />
     {/if}

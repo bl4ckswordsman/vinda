@@ -8,6 +8,8 @@
     import Music from "@lucide/svelte/icons/music";
     import Gamepad2 from "@lucide/svelte/icons/gamepad-2";
     import Folder from "@lucide/svelte/icons/folder";
+    import Headphones from "@lucide/svelte/icons/headphones";
+    import Layers from "@lucide/svelte/icons/layers";
 
     interface Props {
         name: string;
@@ -19,6 +21,12 @@
 
 {#if name === "Classical"}
     <Music {size} class="vinda-icon" />
+{:else if name === "music"}
+    <Music {size} class="vinda-icon" />
+{:else if name === "headphones"}
+    <Headphones {size} class="vinda-icon" />
+{:else if name === "layers"}
+    <Layers {size} class="vinda-icon" />
 {:else if name === "Games"}
     <Gamepad2 {size} class="vinda-icon" />
 {:else if name === "theme-system"}

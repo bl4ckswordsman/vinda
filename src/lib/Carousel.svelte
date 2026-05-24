@@ -1,7 +1,8 @@
 <script lang="ts">
     import { DragGesture } from "@use-gesture/vanilla";
     import { fade } from "svelte/transition";
-    import type { ModelEntry, TuneEntry } from "./types.ts";
+    import type { ModelEntry, TuneEntry } from "./types";
+    import { getSoundType } from "./types";
     import { CATEGORY_ICONS, GROUP_ICONS } from "./icons";
     import Icon from "./Icon.svelte";
 
@@ -10,8 +11,10 @@
         tunes: TuneEntry[];
         selectedModelId: string;
         selectedTuneId: string;
+        soundTypeFilter: "all" | "music-box" | "normal";
         onModelSelect: (id: string) => void;
         onTuneSelect: (id: string) => void;
+        onFilterSelect: (filter: "all" | "music-box" | "normal") => void;
     }
 
     let {
@@ -19,8 +22,10 @@
         tunes,
         selectedModelId,
         selectedTuneId,
+        soundTypeFilter,
         onModelSelect,
         onTuneSelect,
+        onFilterSelect,
     }: Props = $props();
 
     let trayEl = $state<HTMLElement | null>(null);
@@ -30,10 +35,17 @@
     let currentGroup = $state<string | null>(null);
 
     // Derived: unique categories and their icons
+    // Derived: filtered tunes based on active sound type filter
+    const filteredTunes = $derived.by(() => {
+        if (soundTypeFilter === "all") return tunes;
+        return tunes.filter(t => getSoundType(t) === soundTypeFilter);
+    });
+
+    // Derived: unique categories and their icons
     const categories = $derived.by(() => {
         const seen = new Set<string>();
         const list: { name: string; icon: string }[] = [];
-        for (const t of tunes) {
+        for (const t of filteredTunes) {
             const cat = t.category || "Uncategorized";
             if (!seen.has(cat)) {
                 seen.add(cat);
@@ -48,7 +60,7 @@
         if (!currentCategory) return [];
         const seen = new Set<string>();
         const list: { name: string; icon: string }[] = [];
-        for (const t of tunes) {
+        for (const t of filteredTunes) {
             if (t.category === currentCategory && t.group) {
                 if (!seen.has(t.group)) {
                     seen.add(t.group);
@@ -62,7 +74,7 @@
     // Derived: visible tunes in current selection view
     const visibleTunes = $derived.by(() => {
         if (!currentCategory) return [];
-        return tunes.filter(t => {
+        return filteredTunes.filter(t => {
             const sameCat = (t.category || "Uncategorized") === currentCategory;
             const sameGrp = currentGroup ? t.group === currentGroup : !t.group;
             return sameCat && sameGrp;
@@ -77,11 +89,18 @@
     });
 
     // Auto-sync navigation state with the active selected tune
+    // Auto-sync navigation state with the active selected tune (if active filter permits)
     $effect(() => {
-        const activeTune = tunes.find(t => t.id === selectedTuneId);
+        const activeTune = filteredTunes.find(t => t.id === selectedTuneId);
         if (activeTune) {
             currentCategory = activeTune.category || null;
             currentGroup = activeTune.group || null;
+        } else {
+            // If active tune is filtered out, ensure currentCategory is still valid for this filter
+            if (currentCategory && !categories.some(c => c.name === currentCategory)) {
+                currentCategory = null;
+                currentGroup = null;
+            }
         }
     });
 
@@ -117,16 +136,18 @@
                         onModelSelect(models[nextIdx].id);
                     }
                 } else if (last && Math.abs(my) > 55) {
-                    // Vertical drag → tune selector
+                    // Vertical drag → tune selector (within active filter)
                     const dir = my < 0 ? 1 : -1;
-                    const currentIdx = tunes.findIndex(
+                    const currentIdx = filteredTunes.findIndex(
                         (t) => t.id === selectedTuneId,
                     );
-                    const nextIdx = Math.max(
-                        0,
-                        Math.min(tunes.length - 1, currentIdx + dir),
-                    );
-                    onTuneSelect(tunes[nextIdx].id);
+                    if (currentIdx !== -1 && filteredTunes.length > 0) {
+                        const nextIdx = Math.max(
+                            0,
+                            Math.min(filteredTunes.length - 1, currentIdx + dir),
+                        );
+                        onTuneSelect(filteredTunes[nextIdx].id);
+                    }
                 }
             },
             {
@@ -171,7 +192,41 @@
     </div>
 
     <!-- Tune strip -->
-    <div class="strip-label">{tunePath}</div>
+    <div class="tune-header">
+        <div class="strip-label">{tunePath}</div>
+        <div class="segmented-control" role="tablist" aria-label="Filter tunes by type">
+            <button
+                class="segment-btn"
+                class:active={soundTypeFilter === "all"}
+                onclick={() => onFilterSelect("all")}
+                role="tab"
+                aria-selected={soundTypeFilter === "all"}
+            >
+                <Icon name="layers" size={13} />
+                <span>All</span>
+            </button>
+            <button
+                class="segment-btn"
+                class:active={soundTypeFilter === "music-box"}
+                onclick={() => onFilterSelect("music-box")}
+                role="tab"
+                aria-selected={soundTypeFilter === "music-box"}
+            >
+                <Icon name="music" size={13} />
+                <span>Music Box</span>
+            </button>
+            <button
+                class="segment-btn"
+                class:active={soundTypeFilter === "normal"}
+                onclick={() => onFilterSelect("normal")}
+                role="tab"
+                aria-selected={soundTypeFilter === "normal"}
+            >
+                <Icon name="headphones" size={13} />
+                <span>Normal</span>
+            </button>
+        </div>
+    </div>
     <div class="tune-strip">
         {#if !currentCategory}
             {#each categories as cat (cat.name)}
@@ -229,7 +284,7 @@
                     aria-pressed={tune.id === selectedTuneId}
                 >
                     <span class="chip-icon">
-                        <Icon name="Classical" size={15} />
+                        <Icon name={getSoundType(tune) === "music-box" ? "music" : "headphones"} size={15} />
                     </span>
                     <span>{tune.label}</span>
                 </button>
@@ -265,8 +320,65 @@
         text-transform: uppercase;
         color: var(--text-muted);
         padding-left: 4px;
-        margin-bottom: -2px;
         transition: color 0.3s;
+    }
+
+    /* ── Tune Header & Segmented Filter Control ── */
+    .tune-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-right: 4px;
+        margin-top: 4px;
+        margin-bottom: -2px;
+    }
+
+    .segmented-control {
+        display: flex;
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-pill);
+        padding: 2px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        gap: 2px;
+    }
+
+    :global(.app.light) .segmented-control {
+        background: rgba(48, 16, 20, 0.05);
+    }
+
+    .segment-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: var(--radius-pill);
+        transition: color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .segment-btn:hover {
+        color: var(--text);
+    }
+
+    .segment-btn.active {
+        background: var(--surface-hover);
+        color: var(--text);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    :global(.app.light) .segment-btn.active {
+        background: var(--surface-hover);
+        box-shadow: 0 2px 6px rgba(48, 16, 20, 0.08);
+    }
+
+    .segment-btn:active {
+        transform: scale(0.96);
     }
 
     .model-strip,

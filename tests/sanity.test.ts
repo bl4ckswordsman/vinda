@@ -2,6 +2,7 @@ import { expect, test, describe } from "bun:test";
 import fs from 'fs';
 import path from 'path';
 import { cleanDropboxUrl, resolveAudioUrl } from "../src/lib/customTunesDb";
+import { getSoundType } from "../src/lib/types";
 
 describe("Dropbox URL Parser Sanity Checks", () => {
   test("Should bypass non-Dropbox links", () => {
@@ -149,5 +150,37 @@ describe("Icon Mapping Integrity Sanity Checks", () => {
       if (iconName === "Default") continue; // Default maps to fallback folder icon
       expect(supportedIcons).toContain(iconName);
     }
+  });
+});
+
+describe("Sound Type Resolution Sanity Checks", () => {
+  test("Should classify sequenced tunes as music-box", () => {
+    const tune = {
+      id: "seq",
+      label: "Sequenced",
+      notes: ["C4", "E4"],
+      durations: ["4n"],
+      bpm: 120
+    };
+    expect(getSoundType(tune)).toBe("music-box");
+  });
+
+  test("Should classify file-based tunes as normal", () => {
+    const tune = {
+      id: "file",
+      label: "File-based",
+      file: "song.mp3"
+    };
+    expect(getSoundType(tune)).toBe("normal");
+  });
+
+  test("Should respect explicit soundType override if provided", () => {
+    const tune = {
+      id: "override",
+      label: "Override",
+      file: "musicbox-style.mp3",
+      soundType: "music-box" as const
+    };
+    expect(getSoundType(tune)).toBe("music-box");
   });
 });

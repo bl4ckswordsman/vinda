@@ -10,6 +10,7 @@ export interface BaseTune {
   label: string;
   category?: string;
   group?: string;
+  soundType?: 'music-box' | 'normal';
 }
 
 export interface SequencedTune extends BaseTune {
@@ -31,3 +32,9 @@ export function isFileTune(t: TuneEntry): t is FileTune {
 export function isSequencedTune(t: TuneEntry): t is SequencedTune {
   return 'notes' in t;
 }
+
+export function getSoundType(t: TuneEntry): 'music-box' | 'normal' {
+  if (t.soundType) return t.soundType;
+  return isSequencedTune(t) ? 'music-box' : 'normal';
+}
+

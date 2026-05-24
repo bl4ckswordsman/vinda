@@ -32,6 +32,9 @@ export function createAppState() {
   let tunes = $state<TuneEntry[]>([DEFAULT_TUNE]);
   let selectedTuneId = $state('default');
 
+  // Sound type filter
+  let soundTypeFilter = $state<'all' | 'music-box' | 'normal'>('all');
+
   // Theme
   let theme = $state<'system' | 'dark' | 'light'>(
     typeof window !== 'undefined'
@@ -99,6 +102,9 @@ export function createAppState() {
 
     get selectedTuneId() { return selectedTuneId; },
     set selectedTuneId(id: string) { selectedTuneId = id; },
+
+    get soundTypeFilter() { return soundTypeFilter; },
+    set soundTypeFilter(f: 'all' | 'music-box' | 'normal') { soundTypeFilter = f; },
 
     get theme() { return theme; },
     set theme(t: 'system' | 'dark' | 'light') { theme = t; },

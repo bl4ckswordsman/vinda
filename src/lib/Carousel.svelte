@@ -21,6 +21,7 @@
         onTempoChange: (tempo: number) => void;
         onToggleCollapse: () => void;
         onImportClick: () => void;
+        onModelColorChange: (color: string) => void;
     }
  
     let {
@@ -39,9 +40,25 @@
         onTempoChange,
         onToggleCollapse,
         onImportClick,
+        onModelColorChange,
     }: Props = $props();
  
     let trayEl = $state<HTMLElement | null>(null);
+
+    const PRESET_COLORS = [
+        "#ff6275", // Coral Red (Default)
+        "#ff9f43", // Sunset Orange
+        "#feca57", // Warm Yellow
+        "#1dd1a1", // Mint Green
+        "#00d2d3", // Cyan/Teal
+        "#54a0ff", // Electric Blue
+        "#5f27cd", // Lavender Purple
+        "#ffffff"  // Clean White
+    ];
+
+    const selectedModel = $derived(
+        models.find(m => m.id === selectedModelId) || models[0]
+    );
 
     let currentCategory = $state<string | null>(null);
     let currentGroup = $state<string | null>(null);
@@ -155,6 +172,42 @@
                             <span>{model.label}</span>
                         </button>
                     {/each}
+                </div>
+
+                <!-- Model Color Picker Row -->
+                <div class="color-picker-row">
+                    <span class="picker-label">Color</span>
+                    <div class="color-presets">
+                        {#each PRESET_COLORS as color}
+                            <button
+                                class="preset-dot"
+                                class:active={selectedModel.color === color}
+                                style="background: {color}; --glow-color: {color}"
+                                onclick={() => onModelColorChange(color)}
+                                aria-label="Preset color {color}"
+                            ></button>
+                        {/each}
+                        
+                        <div class="custom-color-wrapper">
+                            <input
+                                type="color"
+                                id="custom-model-color"
+                                value={selectedModel.color}
+                                oninput={(e) => onModelColorChange(e.currentTarget.value)}
+                                class="custom-color-input"
+                            />
+                            <label
+                                for="custom-model-color"
+                                class="custom-color-btn"
+                                class:active={!PRESET_COLORS.includes(selectedModel.color)}
+                                style="background: {selectedModel.color}; --glow-color: {selectedModel.color}"
+                                title="Custom Color"
+                                aria-label="Choose custom color"
+                            >
+                                <Icon name="palette" size={12} />
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         {:else}
@@ -517,6 +570,102 @@
 
     .segment-btn:active {
         transform: scale(0.96);
+    }
+
+    /* ── Color Picker Row ── */
+    .color-picker-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+        padding: 0 4px;
+    }
+
+    .picker-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        min-width: 50px;
+    }
+
+    .color-presets {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .preset-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s, box-shadow 0.18s;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .preset-dot:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 8px var(--glow-color);
+    }
+
+    .preset-dot.active {
+        border-color: var(--text);
+        transform: scale(1.25);
+        box-shadow: 0 0 12px var(--glow-color);
+    }
+
+    /* Custom Color Picker */
+    .custom-color-wrapper {
+        position: relative;
+        width: 22px;
+        height: 22px;
+    }
+
+    .custom-color-input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    .custom-color-btn {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s, box-shadow 0.18s;
+        pointer-events: none; /* Let click go through to input */
+        filter: brightness(0.9);
+        z-index: 1;
+    }
+
+    .custom-color-wrapper:hover .custom-color-btn {
+        transform: scale(1.2);
+        box-shadow: 0 0 8px var(--glow-color);
+        filter: brightness(1.1);
+    }
+
+    .custom-color-btn.active {
+        border-color: var(--text);
+        transform: scale(1.25);
+        box-shadow: 0 0 12px var(--glow-color);
+        filter: brightness(1.1);
     }
 
     .model-strip,

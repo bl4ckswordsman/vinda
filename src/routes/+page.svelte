@@ -378,6 +378,9 @@
             onTempoChange={(tempo) => {
                 appState.tempoMultiplier = tempo;
             }}
+            onModelColorChange={(color) => {
+                appState.updateModelColor(appState.selectedModelId, color);
+            }}
             onToggleCollapse={() => {
                 appState.isTrayCollapsed = !appState.isTrayCollapsed;
             }}

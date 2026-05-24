@@ -16,6 +16,25 @@ const DEFAULT_MODEL: ModelEntry = {
 };
 
 export function createAppState() {
+  function applyCustomColors(newModels: ModelEntry[]): ModelEntry[] {
+    if (typeof window === 'undefined') return newModels;
+    try {
+      const stored = localStorage.getItem('vinda-custom-model-colors');
+      if (stored) {
+        const customColors = JSON.parse(stored);
+        return newModels.map(m => {
+          if (customColors[m.id]) {
+            return { ...m, color: customColors[m.id] };
+          }
+          return m;
+        });
+      }
+    } catch (e) {
+      console.error('Failed to parse custom model colors', e);
+    }
+    return newModels;
+  }
+
   // Spin / rotation
   let velocity = $state(0);
   let isPlaying = $state(false);
@@ -25,7 +44,11 @@ export function createAppState() {
   let lastInteraction = $state(Date.now());
 
   // Model selection
-  let models = $state<ModelEntry[]>([DEFAULT_MODEL]);
+  let models = $state<ModelEntry[]>(
+    typeof window !== 'undefined'
+      ? applyCustomColors([DEFAULT_MODEL])
+      : [DEFAULT_MODEL]
+  );
   let selectedModelId = $state('carousel');
 
   // Tune selection
@@ -111,7 +134,7 @@ export function createAppState() {
     set lastInteraction(t: number) { lastInteraction = t; },
 
     get models() { return models; },
-    set models(m: ModelEntry[]) { models = m; },
+    set models(m: ModelEntry[]) { models = applyCustomColors(m); },
 
     get selectedModelId() { return selectedModelId; },
     set selectedModelId(id: string) { selectedModelId = id; },
@@ -145,6 +168,25 @@ export function createAppState() {
         theme = 'light';
       } else {
         theme = 'system';
+      }
+    },
+
+    updateModelColor(modelId: string, color: string) {
+      models = models.map(m => {
+        if (m.id === modelId) {
+          return { ...m, color };
+        }
+        return m;
+      });
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('vinda-custom-model-colors');
+          const customColors = stored ? JSON.parse(stored) : {};
+          customColors[modelId] = color;
+          localStorage.setItem('vinda-custom-model-colors', JSON.stringify(customColors));
+        } catch (e) {
+          console.error('Failed to save custom model color', e);
+        }
       }
     },
 

@@ -13,6 +13,7 @@
 
   let tunesCount = $state(0);
   let syncUrl = $state('');
+  let savedUrl = $state('');
   let dragOver = $state(false);
   let status = $state<{ type: 'success' | 'error' | 'loading' | 'idle'; message: string }>({
     type: 'idle',
@@ -20,7 +21,8 @@
   });
 
   onMount(async () => {
-    syncUrl = localStorage.getItem('vinda-custom-tunes-url') || '';
+    savedUrl = localStorage.getItem('vinda-custom-tunes-url') || '';
+    syncUrl = savedUrl;
     await refreshStatus();
   });
 
@@ -89,7 +91,6 @@
     if (!syncUrl.trim()) return;
 
     status = { type: 'loading', message: 'Downloading tunes from URL...' };
-    localStorage.setItem('vinda-custom-tunes-url', syncUrl.trim());
 
     try {
       const targetUrl = cleanDropboxUrl(syncUrl);
@@ -100,6 +101,9 @@
 
       const blob = await response.blob();
       const count = await importZip(blob);
+
+      localStorage.setItem('vinda-custom-tunes-url', syncUrl.trim());
+      savedUrl = syncUrl.trim();
 
       status = { 
         type: 'success', 
@@ -122,11 +126,51 @@
     status = { type: 'loading', message: 'Clearing database...' };
     try {
       await clearCustomTunes();
+      localStorage.removeItem('vinda-custom-tunes-url');
+      savedUrl = '';
+      syncUrl = '';
       status = { type: 'success', message: 'All custom tunes removed.' };
       await refreshStatus();
       onImportSuccess();
     } catch (err: any) {
       status = { type: 'error', message: err.message || 'Failed to clear custom tunes.' };
+    }
+  }
+
+  async function handleShare() {
+    if (!savedUrl) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Vinda Private Tunes',
+          text: 'Sync my custom tunes library in your browser!',
+          url: savedUrl
+        });
+        return;
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+        } else {
+          return;
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(savedUrl);
+      const originalMessage = status.message;
+      const originalType = status.type;
+
+      status = { type: 'success', message: 'Sync link copied to clipboard!' };
+      setTimeout(() => {
+        if (status.message === 'Sync link copied to clipboard!') {
+          status = { type: originalType, message: originalMessage };
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      status = { type: 'error', message: 'Could not copy link to clipboard.' };
     }
   }
 
@@ -194,12 +238,25 @@
         <div class="url-sync-section">
           <h3>Sync from URL</h3>
           <div class="url-input-group">
-            <input 
-              type="url" 
-              placeholder="https://example.com/private-tunes.zip" 
-              bind:value={syncUrl} 
-              aria-label="Private tunes ZIP URL" 
-            />
+            <div class="input-wrapper">
+              <input 
+                type="url" 
+                placeholder="https://example.com/private-tunes.zip" 
+                bind:value={syncUrl} 
+                aria-label="Private tunes ZIP URL" 
+              />
+              {#if savedUrl}
+                <button 
+                  class="share-btn" 
+                  onclick={handleShare}
+                  type="button"
+                  title="Share library link"
+                  aria-label="Share library link"
+                >
+                  <Icon name="share" size={16} />
+                </button>
+              {/if}
+            </div>
             <button 
               class="primary-btn" 
               onclick={handleSyncFromUrl} 
@@ -454,23 +511,59 @@
   .url-input-group {
     display: flex;
     gap: 8px;
+    width: 100%;
   }
 
-  .url-input-group input {
+  .input-wrapper {
+    position: relative;
     flex: 1;
+    min-width: 0;
+  }
+
+  .input-wrapper input {
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 0 12px;
+    padding-right: 42px;
     color: var(--text);
     font-size: 14px;
     height: 40px;
     outline: none;
     transition: border-color 0.15s;
+    box-sizing: border-box;
   }
 
-  .url-input-group input:focus {
+  .input-wrapper input:focus {
     border-color: var(--border-active);
+  }
+
+  .share-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    transition: color 0.15s, background-color 0.15s, transform 0.1s;
+    height: 28px;
+    width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  .share-btn:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+
+  .share-btn:active {
+    transform: translateY(-50%) scale(0.92);
   }
 
   .hint {

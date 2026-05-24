@@ -11,6 +11,7 @@
     import Headphones from "@lucide/svelte/icons/headphones";
     import Layers from "@lucide/svelte/icons/layers";
     import Palette from "@lucide/svelte/icons/palette";
+    import Share2 from "@lucide/svelte/icons/share-2";
 
     interface Props {
         name: string;
@@ -20,7 +21,9 @@
     let { name, size = 16 }: Props = $props();
 </script>
 
-{#if name === "Classical"}
+{#if name === "share"}
+    <Share2 {size} class="vinda-icon" />
+{:else if name === "Classical"}
     <Music {size} class="vinda-icon" />
 {:else if name === "music"}
     <Music {size} class="vinda-icon" />

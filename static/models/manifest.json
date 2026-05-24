@@ -4,5 +4,11 @@
     "file": "",
     "label": "Classic",
     "color": "#ff6275"
+  },
+  {
+    "id": "carousel",
+    "file": "carousel_music_box-1-spinner.glb",
+    "label": "Carousel",
+    "color": "#4a90e2"
   }
 ]

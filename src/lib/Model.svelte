@@ -22,6 +22,7 @@
 
     let spinnerRef = $state<THREE.Object3D | null>(null);
     let displayVelocity = $state(0);
+    let initialSceneY = 0;
 
     // Lowered friction so it responds tighter to your finger swipes
     const FRICTION = 0.85;
@@ -35,11 +36,21 @@
 
         let foundSpinner = false;
 
+        // Reset scale and position to ensure calculation is idempotent
+        scene.scale.set(1, 1, 1);
+        scene.position.set(0, 0, 0);
+        scene.updateMatrixWorld(true);
+
+        const box = new THREE.Box3();
+        let hasMesh = false;
+
         scene.traverse((node: THREE.Object3D) => {
             if (node instanceof THREE.Mesh) {
                 node.material = mat;
                 node.castShadow = true;
                 node.receiveShadow = true;
+                box.expandByObject(node);
+                hasMesh = true;
             }
             if (node.name.endsWith("_Spinner")) {
                 spinnerRef = node;
@@ -50,15 +61,21 @@
         // Fallback: treat entire scene as spinner
         if (!foundSpinner) spinnerRef = scene;
 
-        // Auto-center + normalise scale to fit in a 2-unit bounding box
-        const box = new THREE.Box3().setFromObject(scene);
+        if (!hasMesh) {
+            box.setFromObject(scene);
+        }
+
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        if (maxDim > 0) scene.scale.setScalar(2 / maxDim);
+        const scaleFactor = maxDim > 0 ? 2 / maxDim : 1;
+        scene.scale.setScalar(scaleFactor);
 
-        const centeredBox = new THREE.Box3().setFromObject(scene);
-        const center = centeredBox.getCenter(new THREE.Vector3());
-        scene.position.sub(center);
+        const center = box.getCenter(new THREE.Vector3());
+        center.multiplyScalar(scaleFactor);
+        scene.position.copy(center).negate();
+
+        // Capture initial Y position of the centered scene
+        initialSceneY = scene.position.y;
     });
 
     // Per-frame rotation with inertia
@@ -71,11 +88,12 @@
 
         if (spinnerRef) {
             // Rotate at a slow, realistic speed when playing.
-            spinnerRef.rotation.y += displayVelocity * delta * 0.15;
+            spinnerRef.rotation.y += displayVelocity * delta;
+        }
 
-            if (!reducedMotion) {
-                spinnerRef.position.y = Math.sin(Date.now() * 0.0008) * 0.04;
-            }
+        const scene = $gltf?.scene;
+        if (scene && !reducedMotion) {
+            scene.position.y = initialSceneY + Math.sin(Date.now() * 0.0008) * 0.04;
         }
     });
 </script>

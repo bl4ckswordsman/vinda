@@ -75,9 +75,11 @@ export class AudioEngine {
 
     this.sequence = new Tone.Sequence<number>(
       (time) => {
-        const note = notes[noteIndex % notes.length];
-        const dur  = durations[noteIndex % durations.length] ?? '8n';
-        this.synth?.triggerAttackRelease(note, dur, time);
+        const note = notes.at(noteIndex % notes.length);
+        const dur  = durations.at(noteIndex % durations.length) ?? '8n';
+        if (note !== undefined) {
+          this.synth?.triggerAttackRelease(note, dur, time);
+        }
         noteIndex++;
       },
       notes.map((_, i) => i),

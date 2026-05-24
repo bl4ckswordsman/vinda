@@ -67,10 +67,13 @@ export async function importZip(zipData: ArrayBuffer | Blob): Promise<number> {
 
   // Find manifest-private.json in the zip (case-insensitive, can be in a folder)
   let manifestFile: JSZip.JSZipObject | null = null;
-  for (const path in zip.files) {
+  const paths = Object.keys(zip.files);
+  for (const path of paths) {
     if (path.toLowerCase().endsWith('manifest-private.json')) {
-      manifestFile = zip.files[path];
-      break;
+      if (Object.prototype.hasOwnProperty.call(zip.files, path)) {
+        manifestFile = zip.file(path);
+        break;
+      }
     }
   }
 
@@ -101,11 +104,14 @@ export async function importZip(zipData: ArrayBuffer | Blob): Promise<number> {
     // Locate the matching audio file inside the ZIP (basename case-insensitive match)
     const fileBase = entry.file.split('/').pop()?.toLowerCase() || entry.file.toLowerCase();
     let audioFile: JSZip.JSZipObject | null = null;
-    for (const path in zip.files) {
+    const audioPaths = Object.keys(zip.files);
+    for (const path of audioPaths) {
       const pathBase = path.split('/').pop()?.toLowerCase() || path.toLowerCase();
       if (pathBase === fileBase) {
-        audioFile = zip.files[path];
-        break;
+        if (Object.prototype.hasOwnProperty.call(zip.files, path)) {
+          audioFile = zip.file(path);
+          break;
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { setContext, untrack } from "svelte";
+    import { fade } from "svelte/transition";
     import { createAppState } from "$lib/state.svelte";
     import { GestureController } from "$lib/GestureController";
     import { AudioEngine } from "$lib/AudioEngine";
@@ -10,6 +11,7 @@
     import type { PageData } from "./$types";
     import { getCustomTunes } from "$lib/customTunesDb";
     import ImportModal from "$lib/ImportModal.svelte";
+    import StarsBackground from "$lib/StarsBackground.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -270,6 +272,13 @@
     role="application"
     aria-label="Vinda fidget music box"
 >
+    <!-- Subtle twinkling background stars in dark mode -->
+    {#if appState.darkMode && !appState.isSleeping}
+        <div transition:fade={{ duration: 800 }}>
+            <StarsBackground />
+        </div>
+    {/if}
+
     <!-- 3D canvas layer — gesture target -->
     <div bind:this={canvasWrapper} class="canvas-target" aria-hidden="true">
         <Scene

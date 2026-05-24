@@ -13,10 +13,12 @@
         selectedTuneId: string;
         soundTypeFilter: "all" | "music-box" | "normal";
         activeMenuTab: "tunes" | "designs";
+        tempoMultiplier: number;
         onModelSelect: (id: string) => void;
         onTuneSelect: (id: string) => void;
         onFilterSelect: (filter: "all" | "music-box" | "normal") => void;
         onMenuTabSelect: (tab: "tunes" | "designs") => void;
+        onTempoChange: (tempo: number) => void;
     }
 
     let {
@@ -26,10 +28,12 @@
         selectedTuneId,
         soundTypeFilter,
         activeMenuTab,
+        tempoMultiplier,
         onModelSelect,
         onTuneSelect,
         onFilterSelect,
         onMenuTabSelect,
+        onTempoChange,
     }: Props = $props();
 
     let trayEl = $state<HTMLElement | null>(null);
@@ -237,6 +241,35 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Tempo Speed Control Slider -->
+            <div class="tempo-control-row">
+                <span class="tempo-label">Speed: {tempoMultiplier.toFixed(2)}x</span>
+                <div class="slider-wrapper">
+                    <div class="slider-track-bg"></div>
+                    <div class="slider-track-fill" style="width: {((tempoMultiplier - 0.5) / 1.5) * 100}%"></div>
+                    <input
+                        type="range"
+                        min="0.5"
+                        max="2.0"
+                        step="0.05"
+                        value={tempoMultiplier}
+                        oninput={(e) => onTempoChange(parseFloat(e.currentTarget.value))}
+                        class="tempo-slider"
+                        aria-label="Tune playback speed multiplier"
+                    />
+                </div>
+                <button
+                    class="tempo-reset-btn"
+                    disabled={tempoMultiplier === 1.0}
+                    onclick={() => onTempoChange(1.0)}
+                    aria-label="Reset speed to default"
+                    title="Reset speed to default"
+                >
+                    Reset
+                </button>
+            </div>
+
             <div class="tune-strip">
                 {#if !currentCategory}
                     {#each categories as cat (cat.name)}
@@ -543,5 +576,152 @@
 
     .menu-tab-btn:active {
         transform: scale(0.96);
+    }
+
+    /* ── Tempo Control Row ── */
+    .tempo-control-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 4px;
+        margin-top: -2px;
+        margin-bottom: 8px;
+    }
+
+    .tempo-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        min-width: 82px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+    }
+
+    .slider-wrapper {
+        position: relative;
+        flex: 1;
+        height: 18px;
+        display: flex;
+        align-items: center;
+    }
+
+    .slider-track-bg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 6px;
+        border-radius: var(--radius-pill);
+        background: var(--border);
+        pointer-events: none;
+    }
+
+    .slider-track-fill {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 6px;
+        border-radius: var(--radius-pill);
+        background: var(--accent);
+        pointer-events: none;
+    }
+
+    /* Premium Modern Range Input Custom Styling */
+    .tempo-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        margin: 0;
+        cursor: pointer;
+        outline: none;
+        z-index: 2; /* Sits on top of the custom tracks for hits */
+    }
+
+    .tempo-slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+    }
+
+    .tempo-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 0.1s ease, background-color 0.2s;
+        margin-top: 1px;
+    }
+
+    .tempo-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        background: var(--accent-hover);
+    }
+
+    .tempo-slider::-webkit-slider-thumb:active {
+        transform: scale(0.95);
+    }
+
+    /* Firefox styles */
+    .tempo-slider::-moz-range-track {
+        background: transparent;
+        border: none;
+    }
+
+    .tempo-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border: none;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 0.1s ease, background-color 0.2s;
+    }
+
+    .tempo-slider::-moz-range-thumb:hover {
+        transform: scale(1.2);
+        background: var(--accent-hover);
+    }
+
+    .tempo-slider::-moz-range-thumb:active {
+        transform: scale(0.95);
+    }
+
+    /* Reset Button */
+    .tempo-reset-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: var(--radius-pill);
+        transition: background-color 0.18s, border-color 0.18s, opacity 0.18s, transform 0.1s;
+        z-index: 3;
+    }
+
+    .tempo-reset-btn:hover:not(:disabled) {
+        background: var(--surface-hover);
+        border-color: var(--border-active);
+    }
+
+    .tempo-reset-btn:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    .tempo-reset-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
     }
 </style>

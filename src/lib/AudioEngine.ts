@@ -44,6 +44,12 @@ export class AudioEngine {
 
   async loadTune(tune: TuneEntry): Promise<void> {
     this._initNodes();
+
+    // Cache the playing state of the previous tune before stopping it
+    const wasPlaying = this.player
+      ? (this.player.state === 'started' || this.player.autostart)
+      : (this.sequence ? this.sequence.state === 'started' : false);
+
     this.stop();
     this.currentTune = tune;
 
@@ -58,14 +64,25 @@ export class AudioEngine {
         loopStart: 0,
       }).connect(this.reverb ?? Tone.getDestination());
       
+      if (wasPlaying) {
+        this.player.autostart = true;
+      }
+
       await Tone.loaded();
       if (this.player) {
         this.player.loopEnd = this.player.buffer.duration;
+        // If loading finishes and the player hasn't started yet, force start it if we were playing
+        if (wasPlaying && this.player.state !== 'started') {
+          this.player.start();
+        }
       }
     } else {
       this.baseBpm = tune.bpm;
       Tone.getTransport().bpm.value = tune.bpm;
       this._buildSequence(tune);
+      if (wasPlaying) {
+        this.play();
+      }
     }
   }
 

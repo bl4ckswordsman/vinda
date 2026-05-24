@@ -38,6 +38,9 @@ export function createAppState() {
   // Active menu tab
   let activeMenuTab = $state<'tunes' | 'designs'>('tunes');
 
+  // Tempo multiplier control
+  let tempoMultiplier = $state(1.0);
+
   // Theme
   let theme = $state<'system' | 'dark' | 'light'>(
     typeof window !== 'undefined'
@@ -111,6 +114,9 @@ export function createAppState() {
 
     get activeMenuTab() { return activeMenuTab; },
     set activeMenuTab(t: 'tunes' | 'designs') { activeMenuTab = t; },
+
+    get tempoMultiplier() { return tempoMultiplier; },
+    set tempoMultiplier(v: number) { tempoMultiplier = v; },
 
     get theme() { return theme; },
     set theme(t: 'system' | 'dark' | 'light') { theme = t; },

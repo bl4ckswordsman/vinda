@@ -170,19 +170,19 @@
                     energy = nextEnergy;
                 }
 
-                // Set the VISUAL rotation speed for the 3D model
-                const playSpeed = isAutoPlaying
+                // Set the VISUAL rotation speed for the 3D model (scaled by tempoMultiplier)
+                const playSpeed = (isAutoPlaying
                     ? VISUAL_UNWINDING_SPEED
                     : (nextEnergy > 100
                         ? VISUAL_UNWINDING_SPEED
-                        : (nextEnergy / 100) * VISUAL_UNWINDING_SPEED);
+                        : (nextEnergy / 100) * VISUAL_UNWINDING_SPEED)) * appState.tempoMultiplier;
                 appState.velocity = playSpeed;
 
-                // AUDIO TEMPO CONTROL: Decoupled from the 3D visual rotation!
-                const targetTempo = 0.8;
+                // AUDIO TEMPO CONTROL: Decoupled from the 3D visual rotation! (scaled by tempoMultiplier)
+                const targetTempo = 0.8 * appState.tempoMultiplier;
                 const audioTempo = isAutoPlaying
                     ? targetTempo
-                    : (nextEnergy > 100 ? targetTempo : Math.max(0.1, nextEnergy / 100));
+                    : (nextEnergy > 100 ? targetTempo : Math.max(0.1, (nextEnergy / 100) * appState.tempoMultiplier));
 
                 if (Math.abs(audioTempo - lastAudioTempo) > 0.01) {
                     audio.setVelocity(audioTempo);
@@ -354,6 +354,7 @@
             selectedTuneId={appState.selectedTuneId}
             soundTypeFilter={appState.soundTypeFilter}
             activeMenuTab={appState.activeMenuTab}
+            tempoMultiplier={appState.tempoMultiplier}
             onModelSelect={(id) => {
                 appState.selectedModelId = id;
             }}
@@ -365,6 +366,9 @@
             }}
             onMenuTabSelect={(tab) => {
                 appState.activeMenuTab = tab;
+            }}
+            onTempoChange={(tempo) => {
+                appState.tempoMultiplier = tempo;
             }}
         />
     {/if}

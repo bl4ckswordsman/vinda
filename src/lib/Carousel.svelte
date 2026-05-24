@@ -91,9 +91,18 @@
         // Instantiate DragGesture with the target element
         const gesture = new DragGesture(
             trayEl,
-            ({ active, movement: [mx, my], last }) => {
+            ({ active, movement: [mx, my], last, event }) => {
+                const target = event.target as HTMLElement;
+                const onStrip = target.closest('.model-strip, .tune-strip');
+
                 if (Math.abs(mx) > Math.abs(my)) {
-                    // Horizontal drag → model selector
+                    // If the user drags horizontally on a scrollable strip, let the browser handle it
+                    if (onStrip) {
+                        modelOffset = 0;
+                        return;
+                    }
+
+                    // Horizontal drag on the tray background → model selector
                     modelOffset = active ? mx * 0.4 : 0;
 
                     if (last && Math.abs(mx) > 55) {
@@ -121,7 +130,7 @@
                 }
             },
             {
-                eventOptions: { passive: false },
+                eventOptions: { passive: true },
                 pointer: { touch: true },
             },
         );
@@ -243,7 +252,8 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
-        touch-action: none;
+        /* Allow browser to handle horizontal scrolls (pan-x), let JS handle vertical swipes */
+        touch-action: pan-x;
         z-index: 10;
         transition: background 0.3s, border-color 0.3s;
     }

@@ -8,16 +8,18 @@
         color?: string;
         velocity: number;
         reducedMotion?: boolean;
+        isDarkMode?: boolean;
     }
 
     let {
         color = "#b5a4f5",
         velocity,
         reducedMotion = false,
+        isDarkMode = true,
     }: Props = $props();
 
     // Svelte 5: Make the material reactive so it updates when the color prop changes
-    const mat = $derived(createLavaMaterial({ color }));
+    const mat = $derived(createLavaMaterial({ color, isDarkMode }));
 
     let spinnerGroup = $state<THREE.Group | undefined>(undefined);
     let displayVelocity = $state(0);

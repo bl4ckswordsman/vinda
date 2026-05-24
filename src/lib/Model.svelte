@@ -9,6 +9,7 @@
         color?: string;
         velocity: number; // angular velocity rad/s from GestureController
         reducedMotion?: boolean;
+        isDarkMode?: boolean;
     }
 
     let {
@@ -16,6 +17,7 @@
         color = "#b5a4f5",
         velocity,
         reducedMotion = false,
+        isDarkMode = true,
     }: Props = $props();
 
     const gltf = $derived(useGltf(file));
@@ -32,7 +34,7 @@
         const scene = $gltf?.scene;
         if (!scene) return;
 
-        const mat = createLavaMaterial({ color });
+        const mat = createLavaMaterial({ color, isDarkMode });
 
         let foundSpinner = false;
 

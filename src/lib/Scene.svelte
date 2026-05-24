@@ -52,12 +52,12 @@
         <!-- Lighting -->
         {#if appState}
             <T.AmbientLight
-                intensity={appState.darkMode ? 0.12 : 0.35}
+                intensity={appState.darkMode ? 0.12 : 0.20}
                 color={appState.darkMode ? "#8fa5c7" : "#ffffff"}
             />
             <T.DirectionalLight
                 position={[5, 8, 5]}
-                intensity={appState.darkMode ? 0.65 : 1.1}
+                intensity={appState.darkMode ? 0.55 : 0.75}
                 color={appState.darkMode ? "#ffdce0" : "#ffffff"}
                 castShadow
                 shadow.mapSize.width={2048}
@@ -72,34 +72,47 @@
             />
             <T.DirectionalLight
                 position={[-4, 3, -3]}
-                intensity={appState.darkMode ? 0.95 : 0.4}
+                intensity={appState.darkMode ? 0.60 : 0.25}
                 color={appState.darkMode ? "#9d4edd" : "#ffa4b4"}
             />
         {:else}
-            <T.AmbientLight intensity={0.3} />
-            <T.DirectionalLight position={[5, 8, 5]} intensity={1.0} castShadow />
+            <T.AmbientLight intensity={0.20} />
+            <T.DirectionalLight position={[5, 8, 5]} intensity={0.75} castShadow />
             <T.DirectionalLight
                 position={[-4, 3, -3]}
-                intensity={0.4}
+                intensity={0.25}
                 color="#ffa4b4"
             />
         {/if}
 
         <!-- Bloom post-processing -->
-        <EffectComposer>
-            <BloomEffect
-                intensity={0.3}
-                luminanceThreshold={0.8}
-                luminanceSmoothing={0.5}
-            />
-        </EffectComposer>
+        {#if !appState || appState.darkMode}
+            <EffectComposer>
+                <BloomEffect
+                    intensity={0.15}
+                    luminanceThreshold={0.95}
+                    luminanceSmoothing={0.5}
+                />
+            </EffectComposer>
+        {/if}
 
         <!-- Model Container - positioned slightly lower to center in visible screen area -->
         <T.Group position.y={-0.12}>
             {#if modelFile}
-                <Model file={modelFile} {color} {velocity} {reducedMotion} />
+                <Model
+                    file={modelFile}
+                    {color}
+                    {velocity}
+                    {reducedMotion}
+                    isDarkMode={appState ? appState.darkMode : true}
+                />
             {:else}
-                <ProceduralModel {color} {velocity} {reducedMotion} />
+                <ProceduralModel
+                    {color}
+                    {velocity}
+                    {reducedMotion}
+                    isDarkMode={appState ? appState.darkMode : true}
+                />
             {/if}
         </T.Group>
     </Canvas>

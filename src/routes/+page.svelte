@@ -138,21 +138,52 @@
 
 
     // 1. The Winding Action (Pointer Down)
+    let windingAccumulator = 0;
+    let lastCrankClickTime = 0;
+
     $effect(() => {
         if (!canvasWrapper) return;
 
         gesture.attach(canvasWrapper);
-        gesture.onUpdate = ({ deltaX, isActive }) => {
+        gesture.onUpdate = ({ deltaX, isActive, isFirst }) => {
             gestureActive = isActive;
+
+            if (isFirst) {
+                audio.ensureStarted();
+            }
 
             if (isActive) {
                 appState.isPlaying = false; // Turn off autoplay when manual winding starts
-                // WINDING: Every pixel you pull adds tension to the spring
-                energy += Math.abs(deltaX) * WINDING_ENERGY_RATE;
-                energy = Math.min(energy, 30000);
+                
+                // Only wind up when swiping right (CCW rotation)
+                if (deltaX > 0) {
+                    energy += Math.abs(deltaX) * WINDING_ENERGY_RATE;
+                    energy = Math.min(energy, 30000);
 
-                // Set the VISUAL rotation speed for the 3D model
+                    // Accumulate swipe distance to trigger procedural mechanical clicks
+                    windingAccumulator += Math.abs(deltaX);
+                    if (windingAccumulator >= 40) {
+                        const now = Date.now();
+                        if (now - lastCrankClickTime >= 95) {
+                            audio.playCrankClick();
+                            
+                            // Short tactile haptic vibration on mobile devices
+                            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                                navigator.vibrate(12);
+                            }
+                            
+                            lastCrankClickTime = now;
+                            windingAccumulator = 0;
+                        }
+                    }
+                }
+
+                // Set the VISUAL rotation speed for the 3D model:
+                // Swipe right (positive deltaX) rotates CCW (positive velocity) to match the finger.
+                // Swipe left (negative deltaX) rotates CW (negative velocity) to match the finger.
                 appState.velocity = deltaX * VISUAL_WINDING_SPEED;
+            } else {
+                windingAccumulator = 0;
             }
             resetSleepTimer();
         };
@@ -185,12 +216,13 @@
                 }
 
                 // Set the VISUAL rotation speed for the 3D model (scaled by tempoMultiplier)
+                // Rotating clockwise (negative velocity) during playback.
                 const playSpeed = (isAutoPlaying
                     ? VISUAL_UNWINDING_SPEED
                     : (nextEnergy > 100
                         ? VISUAL_UNWINDING_SPEED
                         : (nextEnergy / 100) * VISUAL_UNWINDING_SPEED)) * appState.tempoMultiplier;
-                appState.velocity = playSpeed;
+                appState.velocity = -playSpeed;
 
                 // AUDIO TEMPO CONTROL: Decoupled from the 3D visual rotation! (scaled by tempoMultiplier)
                 const targetTempo = 0.8 * appState.tempoMultiplier;
@@ -299,7 +331,13 @@
     {/if}
 
     <!-- 3D canvas layer — gesture target -->
-    <div bind:this={canvasWrapper} class="canvas-target" aria-hidden="true">
+    <div
+        bind:this={canvasWrapper}
+        class="canvas-target"
+        onpointerdown={handleInteraction}
+        ontouchstart={handleInteraction}
+        aria-hidden="true"
+    >
         <Scene
             modelFile={currentModelFile}
             color={currentColor}

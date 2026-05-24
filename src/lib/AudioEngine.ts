@@ -19,6 +19,10 @@ export class AudioEngine {
   private player: Tone.Player | null = null;
   private reverb: Tone.Reverb | null = null;
 
+  private crankNoise: Tone.NoiseSynth | null = null;
+  private crankSynth: Tone.Synth | null = null;
+  private crankFilter: Tone.Filter | null = null;
+
   private currentTune: TuneEntry | null = null;
   private baseBpm = 80;
   private userInteracted = false;
@@ -173,9 +177,54 @@ export class AudioEngine {
     Tone.getDestination().volume.rampTo(0, duration);
   }
 
+  private _initCrankSynth(): void {
+    if (this.crankNoise) return;
+
+    // Highpass filter to keep click noise crisp and clean, bypass reverb
+    this.crankFilter = new Tone.Filter({
+      type: 'highpass',
+      frequency: 1000
+    }).toDestination();
+
+    this.crankNoise = new Tone.NoiseSynth({
+      noise: { type: 'pink' },
+      envelope: {
+        attack: 0.001,
+        decay: 0.02,
+        sustain: 0,
+        release: 0.02
+      },
+      volume: 8
+    }).connect(this.crankFilter);
+
+    // Warm, woody mid-frequency thud representing the gear tooth stop
+    this.crankSynth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: {
+        attack: 0.001,
+        decay: 0.025,
+        sustain: 0,
+        release: 0.025
+      },
+      volume: 4
+    }).toDestination();
+  }
+
+  playCrankClick(): void {
+    this._initNodes();
+    this._initCrankSynth();
+
+    const time = Tone.now();
+    this.crankNoise?.triggerAttackRelease('16n', time);
+    this.crankSynth?.triggerAttackRelease('G4', '16n', time);
+  }
+
   dispose(): void {
     this.stop();
     this.synth?.dispose();
     this.reverb?.dispose();
+    this.crankNoise?.dispose();
+    this.crankSynth?.dispose();
+    this.crankFilter?.dispose();
   }
 }

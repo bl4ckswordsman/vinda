@@ -192,10 +192,10 @@ export function cleanDropboxUrl(url: string): string {
 }
 
 /**
- * Resolves a URL to a Blob. If the URL points to a JSON file, 
+ * Resolves a URL to a Blob and its resolved ZIP URL. If the URL points to a JSON file, 
  * it fetches and parses the JSON, then resolves the zipUrl string within it.
  */
-export async function fetchZipFromUrl(url: string): Promise<Blob> {
+export async function fetchZipFromUrl(url: string): Promise<{ blob: Blob; resolvedUrl: string }> {
   const targetUrl = cleanDropboxUrl(url);
   const response = await fetch(targetUrl);
   if (!response.ok) {
@@ -224,10 +224,41 @@ export async function fetchZipFromUrl(url: string): Promise<Blob> {
     if (!zipResponse.ok) {
       throw new Error(`Failed to fetch ZIP from manifest redirect. HTTP status: ${zipResponse.status}`);
     }
-    return await zipResponse.blob();
+    const blob = await zipResponse.blob();
+    return { blob, resolvedUrl: cleanZipUrl };
   }
 
-  return await response.blob();
+  const blob = await response.blob();
+  return { blob, resolvedUrl: targetUrl };
+}
+
+/**
+ * Checks if there is a saved manifest/ZIP URL and, if so, fetches the latest 
+ * manifest in the background. If the ZIP URL has changed, it silently downloads
+ * and imports it. Returns true if an update was successfully synced.
+ */
+export async function runBackgroundSync(): Promise<boolean> {
+  if (!isBrowser) return false;
+  const savedManifestUrl = localStorage.getItem('vinda-custom-tunes-url');
+  if (!savedManifestUrl) return false;
+
+  try {
+    const { blob, resolvedUrl } = await fetchZipFromUrl(savedManifestUrl);
+    const lastSyncedZip = localStorage.getItem('vinda-custom-tunes-last-synced-zip');
+    
+    if (lastSyncedZip === resolvedUrl) {
+      return false; // Already up to date!
+    }
+
+    // Import the new ZIP in the background
+    await importZip(blob);
+    localStorage.setItem('vinda-custom-tunes-last-synced-zip', resolvedUrl);
+    return true;
+  } catch (err) {
+    // Fail silently in the background to not disrupt offline / normal play
+    console.warn('Silent custom tunes background sync skipped:', err);
+    return false;
+  }
 }
 
 /** Resolves a tune filename or URL to the correct Tone.js source URL. */

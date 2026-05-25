@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { setContext, untrack } from "svelte";
+    import { setContext, untrack, onMount } from "svelte";
     import { fade } from "svelte/transition";
     import { createAppState } from "$lib/state.svelte";
     import { GestureController } from "$lib/GestureController";
@@ -9,7 +9,7 @@
     import TuneInfoChip from "$lib/TuneInfoChip.svelte";
     import Icon from "$lib/Icon.svelte";
     import type { PageData } from "./$types";
-    import { getCustomTunes } from "$lib/customTunesDb";
+    import { getCustomTunes, runBackgroundSync } from "$lib/customTunesDb";
     import ImportModal from "$lib/ImportModal.svelte";
     import StarsBackground from "$lib/StarsBackground.svelte";
 
@@ -90,6 +90,16 @@
         return () => {
             customObjectUrls.forEach((url) => URL.revokeObjectURL(url));
         };
+    });
+
+    onMount(() => {
+        // Silent background sync of custom/private tunes on boot
+        runBackgroundSync().then((updated) => {
+            if (updated) {
+                console.log("Custom tunes updated in background!");
+                loadCustomTunes();
+            }
+        });
     });
 
     function togglePlay() {

@@ -47,6 +47,13 @@
 
     try {
       const count = await importZip(file);
+      
+      // Clear URL-based sync flags since a local ZIP was manually imported
+      localStorage.removeItem('vinda-custom-tunes-url');
+      localStorage.removeItem('vinda-custom-tunes-last-synced-zip');
+      savedUrl = '';
+      syncUrl = '';
+
       status = { 
         type: 'success', 
         message: `Successfully imported ${count} tune(s) into your browser!` 
@@ -93,10 +100,11 @@
     status = { type: 'loading', message: 'Downloading tunes from URL...' };
 
     try {
-      const blob = await fetchZipFromUrl(syncUrl);
+      const { blob, resolvedUrl } = await fetchZipFromUrl(syncUrl);
       const count = await importZip(blob);
 
       localStorage.setItem('vinda-custom-tunes-url', syncUrl.trim());
+      localStorage.setItem('vinda-custom-tunes-last-synced-zip', resolvedUrl);
       savedUrl = syncUrl.trim();
 
       status = { 
@@ -121,6 +129,7 @@
     try {
       await clearCustomTunes();
       localStorage.removeItem('vinda-custom-tunes-url');
+      localStorage.removeItem('vinda-custom-tunes-last-synced-zip');
       savedUrl = '';
       syncUrl = '';
       status = { type: 'success', message: 'All custom tunes removed.' };

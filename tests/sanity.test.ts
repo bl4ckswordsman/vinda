@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, afterEach } from "bun:test";
 import fs from 'fs';
 import path from 'path';
-import { cleanDropboxUrl, resolveAudioUrl, fetchZipFromUrl } from "../src/lib/customTunesDb";
+import { cleanDropboxUrl, resolveAudioUrl, fetchZipFromUrl, runBackgroundSync } from "../src/lib/customTunesDb";
 import { getSoundType } from "../src/lib/types";
 
 describe("Dropbox URL Parser Sanity Checks", () => {
@@ -208,9 +208,10 @@ describe("fetchZipFromUrl Manifest and ZIP Resolution Tests", () => {
       } as any;
     };
 
-    const result = await fetchZipFromUrl("https://example.com/tunes.zip");
-    const text = await result.text();
+    const { blob, resolvedUrl } = await fetchZipFromUrl("https://example.com/tunes.zip");
+    const text = await blob.text();
     expect(text).toBe("mock-zip-content");
+    expect(resolvedUrl).toBe("https://example.com/tunes.zip");
   });
 
   test("Should parse JSON manifest and fetch redirected ZIP URL", async () => {
@@ -237,9 +238,10 @@ describe("fetchZipFromUrl Manifest and ZIP Resolution Tests", () => {
       throw new Error(`Unexpected fetch URL: ${url}`);
     };
 
-    const result = await fetchZipFromUrl("https://example.com/manifest.json");
-    const text = await result.text();
+    const { blob, resolvedUrl } = await fetchZipFromUrl("https://example.com/manifest.json");
+    const text = await blob.text();
     expect(text).toBe("zip-redirect-content");
+    expect(resolvedUrl).toBe("https://example.com/real-tunes.zip");
   });
 
   test("Should handle manifest JSON without .json extension using Content-Type header", async () => {
@@ -266,9 +268,10 @@ describe("fetchZipFromUrl Manifest and ZIP Resolution Tests", () => {
       throw new Error(`Unexpected fetch URL: ${url}`);
     };
 
-    const result = await fetchZipFromUrl("https://example.com/get-manifest");
-    const text = await result.text();
+    const { blob, resolvedUrl } = await fetchZipFromUrl("https://example.com/get-manifest");
+    const text = await blob.text();
     expect(text).toBe("zip-redirect-content-2");
+    expect(resolvedUrl).toBe("https://example.com/real-tunes.zip");
   });
 
   test("Should throw error if JSON manifest has no zip URL key", async () => {
@@ -287,5 +290,58 @@ describe("fetchZipFromUrl Manifest and ZIP Resolution Tests", () => {
     expect(fetchZipFromUrl("https://example.com/manifest.json")).rejects.toThrow(
       'JSON manifest does not contain a valid "url" or "zipUrl" string field.'
     );
+  });
+});
+
+describe("runBackgroundSync Tests", () => {
+  let originalFetch: any;
+  let originalWindow: any;
+  let originalLocalStorage: any;
+  let storage: Record<string, string> = {};
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    originalWindow = (globalThis as any).window;
+    originalLocalStorage = (globalThis as any).localStorage;
+
+    (globalThis as any).window = {};
+    storage = {};
+    (globalThis as any).localStorage = {
+      getItem: (key: string) => storage[key] || null,
+      setItem: (key: string, val: string) => { storage[key] = val; },
+      removeItem: (key: string) => { delete storage[key]; },
+      clear: () => { storage = {}; }
+    };
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    (globalThis as any).window = originalWindow;
+    (globalThis as any).localStorage = originalLocalStorage;
+  });
+
+  test("Should return false and do nothing if no manifest URL saved", async () => {
+    const result = await runBackgroundSync();
+    expect(result).toBe(false);
+  });
+
+  test("Should return false if ZIP URL hasn't changed", async () => {
+    storage["vinda-custom-tunes-url"] = "https://example.com/manifest.json";
+    storage["vinda-custom-tunes-last-synced-zip"] = "https://example.com/tunes.zip";
+
+    const mockJsonText = JSON.stringify({
+      zipUrl: "https://example.com/tunes.zip"
+    });
+
+    globalThis.fetch = async (input: any) => {
+      return {
+        ok: true,
+        headers: new Headers({ "content-type": "application/json" }),
+        text: async () => mockJsonText
+      } as any;
+    };
+
+    const result = await runBackgroundSync();
+    expect(result).toBe(false);
   });
 });

@@ -32,7 +32,7 @@
     const aspect = $derived(innerWidth / innerHeight);
     
     // Adjust camera Z based on aspect ratio to prevent clipping in portrait mode
-    const cameraZ = $derived(aspect >= 1 ? 4 : Math.min(5.2, 4 / Math.sqrt(aspect)));
+    const cameraZ = $derived(aspect >= 1 ? 4 : 4 / aspect);
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />

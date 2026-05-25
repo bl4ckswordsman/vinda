@@ -157,7 +157,7 @@ export class AudioEngine {
       Tone.getTransport().bpm.rampTo(targetBpm, 0.15);
 
       if (this.player) {
-        this.player.playbackRate = Math.max(abs, 0.3);
+        this.player.playbackRate = Math.min(Math.max(abs / 0.8, 0.3), 3.0);
       }
 
       this.play();

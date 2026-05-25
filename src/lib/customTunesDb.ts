@@ -191,9 +191,49 @@ export function cleanDropboxUrl(url: string): string {
   return cleaned;
 }
 
+/**
+ * Resolves a URL to a Blob. If the URL points to a JSON file, 
+ * it fetches and parses the JSON, then resolves the zipUrl string within it.
+ */
+export async function fetchZipFromUrl(url: string): Promise<Blob> {
+  const targetUrl = cleanDropboxUrl(url);
+  const response = await fetch(targetUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch. HTTP status: ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = targetUrl.toLowerCase().split('?')[0].endsWith('.json') || contentType.includes('application/json');
+
+  if (isJson) {
+    const text = await response.text();
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch (err: any) {
+      throw new Error(`Failed to parse JSON manifest: ${err.message}`);
+    }
+
+    const zipUrl = data.url || data.zipUrl || data.latestZipUrl || data.zip;
+    if (!zipUrl || typeof zipUrl !== 'string') {
+      throw new Error('JSON manifest does not contain a valid "url" or "zipUrl" string field.');
+    }
+
+    const cleanZipUrl = cleanDropboxUrl(zipUrl);
+    const zipResponse = await fetch(cleanZipUrl);
+    if (!zipResponse.ok) {
+      throw new Error(`Failed to fetch ZIP from manifest redirect. HTTP status: ${zipResponse.status}`);
+    }
+    return await zipResponse.blob();
+  }
+
+  return await response.blob();
+}
+
 /** Resolves a tune filename or URL to the correct Tone.js source URL. */
 export function resolveAudioUrl(tuneFile: string): string {
   return tuneFile.startsWith('blob:') || tuneFile.startsWith('http')
     ? tuneFile
     : `/audio/${tuneFile}`;
 }
+

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { importZip, getCustomTunes, clearCustomTunes, cleanDropboxUrl } from './customTunesDb';
+  import { importZip, getCustomTunes, clearCustomTunes, fetchZipFromUrl } from './customTunesDb';
   import Icon from './Icon.svelte';
 
   interface Props {
@@ -93,13 +93,7 @@
     status = { type: 'loading', message: 'Downloading tunes from URL...' };
 
     try {
-      const targetUrl = cleanDropboxUrl(syncUrl);
-      const response = await fetch(targetUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ZIP. HTTP status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
+      const blob = await fetchZipFromUrl(syncUrl);
       const count = await importZip(blob);
 
       localStorage.setItem('vinda-custom-tunes-url', syncUrl.trim());
@@ -115,7 +109,7 @@
       let msg = err.message || 'Failed to sync from URL.';
       // Check if it looks like a CORS error (fetch failed without status)
       if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
-        msg = 'CORS Error: The host blocks browser downloads. Try uploading the ZIP directly, or use a provider supporting CORS (like Dropbox direct links, GitHub Releases, or a personal server).';
+        msg = 'CORS Error: The host or redirect destination blocks browser downloads. Ensure both allow CORS.';
       }
       status = { type: 'error', message: msg };
     }
@@ -262,11 +256,11 @@
               onclick={handleSyncFromUrl} 
               disabled={!syncUrl.trim() || status.type === 'loading'}
             >
-              Sync
+              {savedUrl && syncUrl.trim() === savedUrl ? 'Refresh' : 'Sync'}
             </button>
           </div>
           <span class="hint">
-            Supports Dropbox sharing links (auto-converts to CORS-friendly URL) and GitHub release assets.
+            Supports ZIP URLs, JSON manifests/Gists (for dynamic ZIP redirection), and Dropbox sharing links.
           </span>
         </div>
 

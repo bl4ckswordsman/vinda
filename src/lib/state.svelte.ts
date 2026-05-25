@@ -22,12 +22,15 @@ export function createAppState() {
       const stored = localStorage.getItem('vinda-custom-model-colors');
       if (stored) {
         const customColors = JSON.parse(stored);
-        return newModels.map(m => {
-          if (customColors[m.id]) {
-            return { ...m, color: customColors[m.id] };
-          }
-          return m;
-        });
+        if (customColors && typeof customColors === 'object') {
+          return newModels.map(m => {
+            const descriptor = Object.getOwnPropertyDescriptor(customColors, m.id);
+            if (descriptor) {
+              return { ...m, color: descriptor.value };
+            }
+            return m;
+          });
+        }
       }
     } catch (e) {
       console.error('Failed to parse custom model colors', e);
@@ -182,8 +185,15 @@ export function createAppState() {
         try {
           const stored = localStorage.getItem('vinda-custom-model-colors');
           const customColors = stored ? JSON.parse(stored) : {};
-          customColors[modelId] = color;
-          localStorage.setItem('vinda-custom-model-colors', JSON.stringify(customColors));
+          if (customColors && typeof customColors === 'object' && modelId !== '__proto__' && modelId !== 'constructor' && modelId !== 'prototype') {
+            Object.defineProperty(customColors, modelId, {
+              value: color,
+              writable: true,
+              enumerable: true,
+              configurable: true
+            });
+            localStorage.setItem('vinda-custom-model-colors', JSON.stringify(customColors));
+          }
         } catch (e) {
           console.error('Failed to save custom model color', e);
         }

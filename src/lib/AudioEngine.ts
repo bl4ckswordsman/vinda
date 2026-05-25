@@ -95,9 +95,9 @@ export class AudioEngine {
     const partEvents: { time: string; note: string | null; dur: string }[] = [];
     let cumulativeTicks = 0;
 
-    for (let i = 0; i < notes.length; i++) {
-      const note = notes[i];
-      const dur = durations[i % durations.length] ?? '8n';
+    let i = 0;
+    for (const note of notes) {
+      const dur = durations.at(i % durations.length) ?? '8n';
 
       if (note !== null && note !== 'rest' && note !== '') {
         partEvents.push({
@@ -108,6 +108,7 @@ export class AudioEngine {
       }
 
       cumulativeTicks += Tone.Time(dur).toTicks();
+      i++;
     }
 
     this.sequence = new Tone.Part((time, event) => {

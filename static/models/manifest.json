@@ -6,6 +6,12 @@
     "color": "#ff6275"
   },
   {
+    "id": "carousel2",
+    "file": "carousel_2_spinning-spinner.glb",
+    "label": "Carousel 2",
+    "color": "#ff6275"
+  },
+  {
     "id": "default",
     "file": "",
     "label": "Classic",

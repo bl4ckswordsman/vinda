@@ -1,6 +1,7 @@
 export const CATEGORY_ICONS: Record<string, string> = {
   Classical: "Classical",
   Games: "Games",
+  Movies: "Movies",
   Default: "Default"
 };
 

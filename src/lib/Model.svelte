@@ -26,15 +26,26 @@
     let displayVelocity = $state(0);
     let initialSceneY = 0;
 
+    let mixer: THREE.AnimationMixer | null = null;
+    let activeAction: THREE.AnimationAction | null = null;
+
     // Lowered friction so it responds tighter to your finger swipes
     const FRICTION = 0.85;
 
     // Replace all materials and split Base/Spinner nodes on load
     $effect(() => {
-        const scene = $gltf?.scene;
+        const currentGltf = $gltf;
+        if (!currentGltf) return;
+
+        const scene = currentGltf.scene;
         if (!scene) return;
 
-        const mat = createLavaMaterial({ color, isDarkMode });
+        // Clean up previous mixer and action
+        if (mixer) {
+            mixer.stopAllAction();
+            mixer = null;
+            activeAction = null;
+        }
 
         let foundSpinner = false;
 
@@ -55,7 +66,6 @@
 
         scene.traverse((node: THREE.Object3D) => {
             if (node instanceof THREE.Mesh) {
-                node.material = mat;
                 node.castShadow = true;
                 node.receiveShadow = true;
                 box.expandByObject(node);
@@ -90,6 +100,46 @@
         if (parent) {
             parent.add(scene);
         }
+
+        // Set up animation mixer if clips exist
+        const animations = currentGltf.animations;
+        if (animations && animations.length > 0) {
+            mixer = new THREE.AnimationMixer(scene);
+            const clip = animations[0];
+            activeAction = mixer.clipAction(clip);
+            activeAction.play();
+        } else {
+            // Manual rotation sibling reparenting (e.g. for Carousel 1)
+            if (foundSpinner && spinnerRef && spinnerRef.parent) {
+                const parentNode = spinnerRef.parent;
+                const siblings = parentNode.children.filter(child => child !== spinnerRef);
+                siblings.forEach(child => {
+                    spinnerRef!.attach(child);
+                });
+            }
+        }
+
+        return () => {
+            if (mixer) {
+                mixer.stopAllAction();
+                mixer = null;
+                activeAction = null;
+            }
+        };
+    });
+
+    // Material updates when color or dark mode changes
+    $effect(() => {
+        const scene = $gltf?.scene;
+        if (!scene) return;
+
+        const mat = createLavaMaterial({ color, isDarkMode });
+
+        scene.traverse((node: THREE.Object3D) => {
+            if (node instanceof THREE.Mesh) {
+                node.material = mat;
+            }
+        });
     });
 
     // Per-frame rotation with inertia
@@ -100,7 +150,10 @@
             displayVelocity = 0;
         }
 
-        if (spinnerRef) {
+        if (mixer) {
+            // Play animation forward or backward matching the spin velocity direction
+            mixer.update(delta * -displayVelocity);
+        } else if (spinnerRef) {
             // Rotate at a slow, realistic speed when playing.
             spinnerRef.rotation.y += displayVelocity * delta;
         }

@@ -350,7 +350,15 @@
                                     <Icon name={getSoundType(tune) === "music-box" ? "music" : "headphones"} size={15} />
                                 </span>
                                 <span class="tune-label-wrapper">
-                                    <span>{tune.label}</span>
+                                    {#if tune.label.includes(' - ')}
+                                        {@const parts = tune.label.split(' - ')}
+                                        <span class="tune-split-label">
+                                            <span class="tune-left">{parts[0].trim()}</span>
+                                            <span class="tune-right">{parts.slice(1).join(' - ').trim()}</span>
+                                        </span>
+                                    {:else}
+                                        <span>{tune.label}</span>
+                                    {/if}
                                     {#if getSoundType(tune) === "music-box"}
                                         <span class="music-box-icon" title="Music Box Tune">
                                             <Icon name="carousel-sound" size={13} />
@@ -753,6 +761,42 @@
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+
+    .tune-chip {
+        padding: 6px 18px;
+    }
+
+    .tune-split-label {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.2;
+    }
+
+    .tune-left {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        white-space: nowrap;
+        transition: color 0.18s ease;
+    }
+
+    .tune-right {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        white-space: nowrap;
+    }
+
+    .chip.active .tune-left {
+        color: rgba(255, 98, 117, 0.65);
+    }
+
+    :global(.app.light) .chip.active .tune-left {
+        color: rgba(214, 59, 81, 0.65);
     }
 
     .music-box-icon {

@@ -245,7 +245,7 @@ export async function runBackgroundSync(): Promise<boolean> {
   try {
     const { blob, resolvedUrl } = await fetchZipFromUrl(savedManifestUrl);
     const lastSyncedZip = localStorage.getItem('vinda-custom-tunes-last-synced-zip');
-    
+
     if (lastSyncedZip === resolvedUrl) {
       return false; // Already up to date!
     }

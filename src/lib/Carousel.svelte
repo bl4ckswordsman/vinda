@@ -233,7 +233,7 @@
                             role="tab"
                             aria-selected={soundTypeFilter === "music-box"}
                         >
-                            <Icon name="music" size={13} />
+                            <Icon name="carousel-sound" size={13} />
                             <span>Music Box</span>
                         </button>
                         <button
@@ -349,7 +349,14 @@
                                 <span class="chip-icon">
                                     <Icon name={getSoundType(tune) === "music-box" ? "music" : "headphones"} size={15} />
                                 </span>
-                                <span>{tune.label}</span>
+                                <span class="tune-label-wrapper">
+                                    <span>{tune.label}</span>
+                                    {#if getSoundType(tune) === "music-box"}
+                                        <span class="music-box-icon" title="Music Box Tune">
+                                            <Icon name="carousel-sound" size={13} />
+                                        </span>
+                                    {/if}
+                                </span>
                             </button>
                         {/each}
                     {/if}
@@ -740,6 +747,43 @@
     .chip-icon {
         font-size: 16px;
         flex-shrink: 0;
+    }
+
+    .tune-label-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .music-box-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border-radius: 6px;
+        background: rgba(255, 98, 117, 0.12);
+        color: var(--accent);
+        border: 1px solid rgba(255, 98, 117, 0.2);
+        transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        flex-shrink: 0;
+        line-height: 0;
+    }
+
+    :global(.app.light) .music-box-icon {
+        background: rgba(214, 59, 81, 0.08);
+        border-color: rgba(214, 59, 81, 0.15);
+    }
+
+    .chip.active .music-box-icon {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    :global(.app.light) .chip.active .music-box-icon {
+        background: rgba(214, 59, 81, 0.16);
+        color: var(--accent);
+        border-color: rgba(214, 59, 81, 0.35);
     }
 
     .back-chip {

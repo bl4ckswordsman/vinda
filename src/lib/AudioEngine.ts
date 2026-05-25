@@ -15,7 +15,7 @@ const BELL_SYNTH_OPTIONS: Partial<Tone.SynthOptions> = {
 
 export class AudioEngine {
   private synth: Tone.Synth | null = null;
-  private sequence: Tone.Sequence<number> | null = null;
+  private sequence: Tone.Part | null = null;
   private player: Tone.Player | null = null;
   private reverb: Tone.Reverb | null = null;
 
@@ -92,20 +92,32 @@ export class AudioEngine {
 
   private _buildSequence(tune: SequencedTune): void {
     const { notes, durations } = tune;
-    let noteIndex = 0;
+    const partEvents: { time: string; note: string | null; dur: string }[] = [];
+    let cumulativeTicks = 0;
 
-    this.sequence = new Tone.Sequence<number>(
-      (time) => {
-        const note = notes.at(noteIndex % notes.length);
-        const dur  = durations.at(noteIndex % durations.length) ?? '8n';
-        if (note !== undefined) {
-          this.synth?.triggerAttackRelease(note, dur, time);
-        }
-        noteIndex++;
-      },
-      notes.map((_, i) => i),
-      '8n'
-    );
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+      const dur = durations[i % durations.length] ?? '8n';
+
+      if (note !== null && note !== 'rest' && note !== '') {
+        partEvents.push({
+          time: `${cumulativeTicks}i`,
+          note: note,
+          dur: dur
+        });
+      }
+
+      cumulativeTicks += Tone.Time(dur).toTicks();
+    }
+
+    this.sequence = new Tone.Part((time, event) => {
+      if (event.note) {
+        this.synth?.triggerAttackRelease(event.note, event.dur, time);
+      }
+    }, partEvents);
+
+    this.sequence.loop = true;
+    this.sequence.loopEnd = `${cumulativeTicks}i`;
   }
 
   play(): void {

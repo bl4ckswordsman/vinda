@@ -41,7 +41,7 @@ bun run package-private
 <details>
 <summary><b>Assets & Attributions</b></summary>
 
-- **Icons**: Icon designs are sourced from [Hugeicons](https://hugeicons.com/) and [Streamline](https://www.streamlinehq.com/) (Cyber Color set).
+- **Icons**: Icon designs are sourced from [Hugeicons](https://hugeicons.com/), [Streamline](https://www.streamlinehq.com/) (Cyber Color set), and [Game Icons](https://game-icons.net/) (under CC BY 3.0).
 - **3D Models**:
   - [Carousel Music Box](https://sketchfab.com/3d-models/carousel-music-box-cde6e0fbaeb249bca7dd822210f3b0e0) by [nina094842](https://sketchfab.com/nina094842) on Sketchfab.
   - [Carousel Spinning](https://sketchfab.com/3d-models/carousel-spinning-bedf6f052d9249bd8c7969d788349895) by [LostBoyz2078](https://sketchfab.com/LostBoyz2078) on Sketchfab.
